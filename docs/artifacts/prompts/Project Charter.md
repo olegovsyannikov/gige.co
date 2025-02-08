@@ -72,3 +72,8 @@ Create a concise yet comprehensive Project Charter (or Project Brief) for a new 
 
 **Instructions for the Specialist:**
 Use our **comprehensive market report** as a cornerstone for setting objectives. Keep the document lean and easily adaptable. This Project Charter/Brief will serve as a **foundational reference** for both **human team members** and **AI agents** contributing to various project tasks. It should be clear, organized, and optimized for **rapid updates** as new insights emerge.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.

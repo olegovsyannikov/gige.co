@@ -3,7 +3,7 @@
 **Objective:**
 Develop a **high-level project plan or roadmap** that:
 
-1. Incorporates **insights from the comprehensive market report** for realistic goal-setting and sequencing.
+1. Incorporates **insights from the comprehensive market report** and **problem solution hypotheses** for realistic goal-setting and sequencing.
 2. Aligns with **Lean Startup** and **Agile** principles, focusing on rapid iteration, experimentation, and stakeholder feedback.
 3. Outlines **AI agent** involvement and collaboration points, ensuring a clear progression that supports both human-led and AI-driven tasks.
 
@@ -56,3 +56,8 @@ Develop a **high-level project plan or roadmap** that:
 
 **Instructions for the Specialist:**
 Use the **comprehensive market report** to inform the roadmap’s direction. Keep it **concise and adaptable**, suitable for **Agile teams** and **AI agents** to reference during sprint planning. Focus on **key learning milestones** and **user feedback cycles** that help guide incremental decision-making and reduce waste.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.

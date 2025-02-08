@@ -3,11 +3,9 @@
 **Objective:**
 Develop a **clear, actionable** Statement of Work (SOW) or Scope Definition for a new product/service that:
 
-1. Integrates insights from our **comprehensive market report** to establish realistic boundaries and deliverables.
+1. Integrates insights from our **comprehensive market report** and **problem solution hypotheses** to establish realistic boundaries and deliverables.
 2. Applies **Lean Startup** and **Agile** principles to enable rapid iteration and continuous feedback.
 3. Anticipates the involvement of **AI agents** throughout the project lifecycle, ensuring seamless collaboration with human teams.
-
----
 
 ### Key Responsibilities
 
@@ -40,16 +38,12 @@ Develop a **clear, actionable** Statement of Work (SOW) or Scope Definition for 
    - Pinpoint **high-level risks** (technical, market, AI model reliability) with lean mitigation strategies.
    - Emphasize quick iteration to reduce uncertainty or pivot as needed.
 
----
-
 ### Required Specialist Role
 
 - **Lean/Agile Project Professional** experienced in creating SOWs/Scope Definitions:
   - Familiarity with **Lean Startup** methodology and **Agile** frameworks.
   - Ability to distill **market research** into clear, prioritized deliverables.
   - Skill in integrating **AI-based** workflows and specifying how AI agents and humans will collaborate.
-
----
 
 ### Deliverable
 
@@ -62,3 +56,8 @@ Develop a **clear, actionable** Statement of Work (SOW) or Scope Definition for 
 
 **Instructions for the Specialist:**
 Keep the document concise yet thorough, ensuring it serves as a **practical reference** for both **human team members** and **AI agents**. Use a **plain language** style and structured format to streamline updates and facilitate **agile, data-driven** decision-making as the project evolves.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.

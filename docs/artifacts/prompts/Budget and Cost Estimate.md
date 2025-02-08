@@ -3,11 +3,9 @@
 **Objective:**
 Develop a **concise, flexible** Budget and Cost Estimate that:
 
-1. Builds on insights from the **comprehensive market report**, ensuring alignment with market-driven financial assumptions.
+1. Builds on insights from the **comprehensive market report** and **problem solution hypotheses**, ensuring alignment with market-driven financial assumptions.
 2. Reflects **Lean Startup** and **Agile** principles, allowing for iterative adjustments as new data emerges.
 3. Incorporates **AI agent** contributions (e.g., automation or specialized analytics) while factoring in the potential costs and savings these provide.
-
----
 
 ### Key Responsibilities
 
@@ -35,16 +33,12 @@ Develop a **concise, flexible** Budget and Cost Estimate that:
    - Propose lightweight, **frequent financial reviews** (aligned with Agile sprints) to track spend vs. plan.
    - Include mechanisms for **AI-driven cost analysis** or alerts if spending exceeds defined thresholds.
 
----
-
 ### Required Specialist Role
 
 - **Agile Financial Analyst** or **Lean Startup Costing Expert** with:
   - Experience in **startup budgeting** and **iterative financial planning**.
   - Familiarity with **AI-driven** cost components and potential ROI from automation.
   - Strong communication skills to convey cost implications in a **clear, data-informed** manner.
-
----
 
 ### Deliverable
 
@@ -56,3 +50,8 @@ Develop a **concise, flexible** Budget and Cost Estimate that:
 
 **Instructions for the Specialist:**
 Use data from the **comprehensive market report** to inform realistic cost assumptions. Keep the format **concise and adaptable**, suited for **AI-augmented** and **human-led** financial reviews. Emphasize flexibility so the budget can **scale up or pivot** quickly based on real-world feedback and validated learning.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.

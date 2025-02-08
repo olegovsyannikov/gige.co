@@ -1,4 +1,8 @@
-# Project Artifacts
+# Project Artifacts Index
+
+**Version:** 1.0
+**Date:** February 8, 2025
+**Author:** Gige.co Product Team
 
 Below is a list of common artifacts and documents that are essential to prepare before kicking off work on most projects. While the exact set of documents varies depending on the project’s methodology (Agile, Waterfall, hybrid) and scope (e.g., software, hardware, research), these deliverables form a strong baseline to ensure alignment among stakeholders, mitigate risks, and set clear expectations from day one.
 

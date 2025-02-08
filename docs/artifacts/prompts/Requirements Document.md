@@ -3,11 +3,9 @@
 **Objective:**
 Create a **clear, structured** Requirements Document that:
 
-1. Synthesizes insights from the **comprehensive market report** to capture business, user, and technical needs.
+1. Synthesizes insights from the **comprehensive market report** and **problem solution hypotheses** to capture business, user, and technical needs.
 2. Reflects **Lean Startup** and **Agile** principles, prioritizing rapid experimentation and feedback loops.
 3. Supports collaboration between **AI agents** and human contributors, ensuring requirements are easily interpretable and testable by both.
-
----
 
 ### Key Responsibilities
 
@@ -30,16 +28,12 @@ Create a **clear, structured** Requirements Document that:
    - Design a lightweight traceability approach so that changes in requirements can be easily tracked against market insights.
    - Maintain a flexible format that facilitates quick updates during iterative cycles.
 
----
-
 ### Required Specialist Role
 
 - **Agile Business Analyst / Requirements Engineer** with:
   - Expertise in **Lean Startup** methodologies and **Agile** requirement elicitation.
   - Strong background in bridging **AI/data-driven** initiatives with traditional software requirements.
   - Excellent communication skills for synthesizing complex market and technical details into an accessible, actionable document.
-
----
 
 ### Deliverable
 
@@ -51,3 +45,8 @@ Create a **clear, structured** Requirements Document that:
 
 **Instructions for the Specialist:**
 Use the **comprehensive market report** as a primary input to ensure alignment with real-world demand. Keep the document **concise** and **actionable**, employing **plain language** and **simple structures** to accommodate **both human and AI consumption**. Enable quick updates and straightforward collaboration during Agile sprints.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.

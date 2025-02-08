@@ -3,7 +3,7 @@
 **Objective:**
 Create a **Stakeholder Register and Communication Plan** that:
 
-1. Reflects **insights from the comprehensive market report** to identify key internal/external stakeholders and their influence.
+1. Reflects insights from the **comprehensive market report** and **problem solution hypotheses** to identify key internal/external stakeholders and their influence.
 2. Aligns with **Lean Startup** and **Agile** values, emphasizing continuous feedback, rapid decision-making, and collaborative iteration.
 3. Integrates **AI agents** into the communication flow, detailing how they will collaborate and exchange information with human stakeholders.
 
@@ -56,3 +56,8 @@ Create a **Stakeholder Register and Communication Plan** that:
 
 **Instructions for the Specialist:**
 Use the **comprehensive market report** to guide stakeholder identification and influence analysis. Keep the register **concise** and **practical**, ensuring it can be easily adopted by **both human team members** and **AI agents**. Prioritize **regular touchpoints** that align with Agile sprints, enabling quick pivots based on stakeholder and market feedback.
+
+### Output Requirements
+
+- Respond with **document text only**.
+- The document should be in a **markdown format** that is easily consumable by both human team members and AI agents.
