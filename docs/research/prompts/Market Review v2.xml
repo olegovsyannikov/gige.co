@@ -1,0 +1,121 @@
+<DeepResearchPrompt>
+    <Title>Comprehensive Market, Strategic Analysis, and Actionable Insights for Gige.co</Title>
+    <Context>
+        Gige.co is a gig economy marketplace for autonomous AI agents, where these agents can participate both as clients and freelancers, backed by human oversight. The goal is to understand every critical facet of launching, scaling, and differentiating such a platform, while also leveraging the existing gig economy as a source of potential users and market opportunities.
+    </Context>
+    <Objective>
+        Provide an in-depth, data-driven research report that covers:
+        - Market size, trends, and segmentation in AI-focused gig economy services
+        - Overlap with the existing freelance/gig economy and potential for user migration
+        - Competitive landscape (direct and indirect)
+        - Consumer needs, pain points, and adoption barriers
+        - Regulatory, ethical, and security considerations for AI-driven marketplaces
+        - Strategic growth opportunities, monetization models, and potential partnerships
+        - Actionable insights, multiple perspectives, and validation of key assumptions
+    </Objective>
+    <KeyFocusAreas>
+        <FocusArea>
+            <Name>1. Market Definition & Size</Name>
+            <Details>
+                - Quantify the gig economy for AI and AI-backed services: current market value, projected growth, sub-markets
+                - Identify geographical regions and industries with the highest potential
+                - Summarize emerging tech and trends influencing AI freelance marketplaces
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>2. Existing Gig Economy & Potential</Name>
+            <Details>
+                - Evaluate the broader freelance market as a primary source of potential users for Gige.co
+                - Explore the feasibility of migrating or converting traditional clients and freelancers to AI-backed roles
+                - Discover market gaps, opportunities, user (both clients and freelancers) expectations, common transaction types, and platform norms in the established gig economy that can inform Gige.co’s approach
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>3. Competitive Analysis</Name>
+            <Details>
+                - List and evaluate direct competitors specializing in AI-focused gig platforms
+                - Examine traditional freelance platforms that might incorporate AI services
+                - Highlight gaps, opportunities, and potential differentiators for Gige.co
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>4. Target Customers & User Insights</Name>
+            <Details>
+                - Identify types of clients (startups, enterprises, etc.) most likely to adopt autonomous AI agents
+                - Explore the profile of human-backed AI freelancers (AI developers, data scientists, domain experts)
+                - Analyze major pain points, motivations, and decision factors
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>5. Technology & Operational Feasibility</Name>
+            <Details>
+                - Review best practices for human-in-the-loop AI workflows
+                - Assess necessary infrastructure, tooling, and APIs for autonomous AI agent management
+                - Examine risk, security, and quality assurance frameworks for AI outputs
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>6. Legal & Regulatory Environment</Name>
+            <Details>
+                - Analyze relevant AI regulations and compliance requirements (GDPR, data protection, liability)
+                - Discuss risk management, insurance, and legal safeguards for AI-agent services
+                - Address ethical considerations, bias, and fairness in AI deployments
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>7. Monetization & Revenue Models</Name>
+            <Details>
+                - Compare commission, subscription, and pay-per-use pricing approaches
+                - Investigate existing payment and escrow solutions for gig marketplaces
+                - Identify factors that influence user willingness to pay
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>8. Go-to-Market & Growth Strategies</Name>
+            <Details>
+                - Recommend marketing channels, messaging, and positioning to attract early adopters
+                - Propose strategic partnerships (tech providers, industry associations, large clients)
+                - Outline methods to scale user acquisition and retention globally
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>9. Financial Projections & KPIs</Name>
+            <Details>
+                - Suggest realistic user growth, revenue forecasts, and cost structures
+                - Propose key performance indicators (KPIs) to track marketplace success
+                - Evaluate different scenarios for rapid vs. moderate market adoption
+            </Details>
+        </FocusArea>
+        <FocusArea>
+            <Name>10. Long-Term Outlook & Innovation Paths</Name>
+            <Details>
+                - Predict emerging AI use cases that could shape the future of gig marketplaces
+                - Explore additional services, vertical integrations, or specialized offerings for the platform
+                - Recommend strategies to remain competitive in a shifting AI and freelance landscape
+            </Details>
+        </FocusArea>
+    </KeyFocusAreas>
+    <ResearchApproach>
+        - Include both quantitative (market size, growth rates, competitor metrics) and qualitative (user interviews, expert opinions) insights
+        - Encourage actionable recommendations for each finding
+        - Gather multiple perspectives to address diverse user needs and industry viewpoints
+        - Validate existing assumptions around market size, user adoption, and technology readiness
+        - Cite reputable sources for all data and statistics
+    </ResearchApproach>
+    <Deliverables>
+        - A structured, comprehensive research report addressing each focus area
+        - Clear citations or links to data sources, market reports, and relevant case studies
+        - Executive summary highlighting strategic insights, recommendations, and next steps
+    </Deliverables>
+    <Format>
+        - Organized headings for each key focus area
+        - Bullet points, charts, or tables where relevant
+        - Recommendations section summarizing best approaches for Gige.co
+    </Format>
+    <InstructionsForDeepResearchModel>
+        - Synthesize all findings into an evidence-based narrative
+        - Highlight actionable insights, note different expert opinions, and confirm or refute key assumptions
+        - Structure the final output so it can be easily referenced for strategic planning
+        - Ensure clarity, depth, and direct applicability to Gige.co
+    </InstructionsForDeepResearchModel>
+</DeepResearchPrompt>
