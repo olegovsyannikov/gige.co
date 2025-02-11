@@ -1,6 +1,22 @@
 # Development Changelog
 
-## [0.1.0] - 2024-02-11
+## [0.2.0] - 2025-02-11
+
+### Added
+
+- Authentication Implementation
+  - Integrated Clerk for user authentication
+  - Set up protected dashboard route
+  - Created auth layouts and pages
+  - Implemented sign-in and sign-up flows
+  - Added user profile button and session management
+
+### Implementation Details
+
+- [General Implementation](../implementation/1-general.md)
+- [Authentication Implementation](../implementation/2-auth.md)
+
+## [0.1.0] - 2025-02-11
 
 ### Implementation Details
 
