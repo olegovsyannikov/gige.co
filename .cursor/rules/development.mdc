@@ -1,0 +1,115 @@
+---
+description: Tasks related to any coding, debugging and testing
+globs: 
+---
+<books>
+  <guidelines>
+    Follow these key book guidelines:
+    - "Clean Code" by Robert C. Martin
+    - "The Pragmatic Programmer" by Andrew Hunt and David Thomas
+    - "Code Complete" by Steve McConnell
+  </guidelines>
+</books>
+
+<task_complexity>
+  <instruction>
+    Before starting any task, assess its complexity, state your evaluation explicitly in your response, and then proceed with an appropriate strategy. This assessment should be done once per task.
+  </instruction>
+  <levels>
+    <easy>
+      <definition>Minor changes, small code fixes, or single-file tasks with straightforward solutions.</definition>
+      <strategy>Provide a direct solution without lengthy review or planning.</strategy>
+    </easy>
+    <medium>
+      <definition>Larger feature additions or updates, multi-file fixes, or tasks requiring moderate design considerations.</definition>
+      <strategy>Include minimal planning and a brief code review to ensure correctness.</strategy>
+    </medium>
+    <hard>
+      <definition>Complex, multi-step tasks, broad cross-system integration, or algorithmically challenging features.</definition>
+      <strategy>Conduct a thorough review, detailed planning, coding, testing, and security checks with clear justifications.</strategy>
+    </hard>
+    <extreme>
+      <definition>System or architectural overhauls, advanced machine learning system design, large-scale refactoring, or high-stakes mission-critical challenges.</definition>
+      <strategy>Perform full pre-review, in-depth planning, detailed coding, post-review, security checks, comprehensive test coverage, and a final critique to ensure the highest quality and reliability.</strategy>
+    </extreme>
+  </levels>
+</task_complexity>
+
+<planning_instructions>
+  <applied>For planning-related responses</applied>
+  <guidelines>
+    - Adhere strictly to the user's specifications.
+    - Summarize the user's requirements in your own words to confirm understanding, then detail your approach in pseudocode.
+    - Leverage modern tools, techniques, and industry standards.
+    - Decompose problems into logical steps.
+    - Recommend alternative solutions when applicable.
+  </guidelines>
+</planning_instructions>
+
+<coding_instructions>
+  <applied>For coding-related responses</applied>
+  <principles_and_quality>
+    - Provide optimized, clean, and well-commented code following best practices.
+    - Employ the DRY principle to reduce redundancy.
+    - Prioritize code readability over performance where applicable.
+    - Include meaningful docstrings and comments explaining the WHY and HOW.
+    - Use descriptive variable names and maintain consistency in naming and string literals.
+    - Avoid magic numbers.
+    - Always use pnpm.
+  </principles_and_quality>
+  <design_and_maintenance>
+    - Preserve existing code structures.
+    - Follow a consistent coding style.
+    - Encourage modular design.
+    - Ensure version compatibility.
+  </design_and_maintenance>
+  <workflow_and_editing>
+    - Output only the relevant code snippets when addressing specific issues.
+    - Make changes file by file and provide all edits in a single chunk.
+    - Always use real file links.
+  </workflow_and_editing>
+</coding_instructions>
+
+<quality_assurance_instructions>
+  <applied>For quality assurance-related responses</applied>
+  <guidelines>
+    - Anticipate and handle edge cases proactively.
+    - Include assertions to validate assumptions.
+    - Suggest appropriate unit tests.
+    - Implement robust error handling and logging.
+  </guidelines>
+</quality_assurance_instructions>
+
+<security_instructions>
+  <applied>For security-related responses</applied>
+  <guidelines>
+    - Consider security implications in all changes.
+    - Write secure code to prevent vulnerabilities.
+    - Perform security reviews to identify potential risks.
+    - Ensure operational soundness and highlight any operational concerns.
+  </guidelines>
+</security_instructions>
+
+<review_instructions>
+  <applied>For review-related responses</applied>
+  <guidelines>
+    - Verify information before presenting.
+    - Correct mistakes without apologizing.
+    - Provide critique with improved alternatives.
+    - Ensure complete implementation of all features.
+    - Use checklists for feature verification.
+    - Deliver complete solutions without TODOs or placeholders.
+  </guidelines>
+</review_instructions>
+
+<what_not_to_do>
+  <guidelines>
+    - Never use apologies.
+    - Avoid providing feedback about your own understanding in comments.
+    - Do not add unnecessary or overly obvious comments.
+    - Do not suggest trivial whitespace changes.
+    - Do not ask for confirmation of provided information.
+    - Do not ask to verify visible implementations.
+    - Do not suggest unnecessary updates.
+  </guidelines>
+</what_not_to_do>
