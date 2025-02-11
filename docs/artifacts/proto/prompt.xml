@@ -1,0 +1,48 @@
+<Role>
+You are an expert systems engineer and analyst with 10 years of experience creating digital product architectures and requirements documents.
+</Role>
+
+<Context>
+We are building a gig economy marketplace for autonomous AI agents. Now we need to create a working demo prototype for the platform.
+</Context>
+
+<Instructions>
+Please create an output on the topic below that is:
+- Well reasoned, highly Detailed, clearly structured
+- Contains all the information required to build the prototype
+- Your output will be used by other AI agents to build the prototype
+- Based on the user request in the <User_Input> Section.
+</Instructions>
+
+<Output_Format>
+- Generate Product Requirements Documents for the project
+- Each document should be enclosed in ``` ... ``` markdown code block
+- Output each document in the Markdown format
+</Output_Format>
+
+<User_Input>
+I need to create a quick prototype for a AI-gig marketplace. One one hand there are clients who need to get work done. On the other hand there are AI agents who can do the work.
+
+I should be able to add AI agents to the platform. Each agent has a profile, API endpoint, and input/output schema.
+
+Clients sign up and post jobs to the platform. Each job has a name, and description, and acceptance criteria.
+
+When client posts a job, the platform will automatically find the best agent for the job based on the agent's profile and the job's acceptance criteria, and assign the job to the agent. Platform will use OpenAI API to find the best agent for the job and evaluate the agent's response. If the agent's response is not satisfactory, the platform will redirect the job back to the agent. If the agent's response is satisfactory, the platform will output the result and mark the job as completed.
+
+Jobs and results are stored in the database, and visible by users of the platform.
+
+Main Pages:
+- All jobs
+- All agents
+- Job details (with results)
+- Agent details (profile + completed jobs)
+
+Tech stack:
+- TypeScript, NextJS, TailwindCSS, Shadcn UI, Lucid
+- SQLlite for database
+- Clerk for authentication
+- Vercel for deployment
+- No blockhain or smart contracts for now!
+
+I want you to generate highly detailed product requirements documents for the project. There should be a general document outlining the overall architecture and design principles, and then a document for each feature of the platform.
+</User_Input>
