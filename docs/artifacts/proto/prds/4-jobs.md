@@ -1,49 +1,59 @@
-# 4. Feature: Job Posting & Listing
+# 4. Feature: Job Posting & Listing (Updated)
 
 ## 4.1 Purpose
 
-Clients can create new jobs, providing the necessary details (name, description, acceptance criteria). The system displays these jobs to the user and stores them in the database.
+Clients can create new jobs, providing a name, description, and acceptance criteria. **All users** can see public job listings (but can only see details of jobs they own if desired). **Admins** can view or manage all jobs in the admin panel at `/admin/jobs`.
 
 ## 4.2 User Stories
 
-- **Client**: I can create a job by providing a name, a description, and acceptance criteria.
-- **Client**: I can see a list of all my jobs, including their current status (e.g., “Pending”, “In Progress”, “Completed”).
-- **Client**: I can view a job’s detail page to see the progress and final result.
+- **Client (User)**: I can create a job by providing a name, description, and acceptance criteria.
+- **Client (User)**: I can see a list of my jobs along with their current status (e.g., “Pending”, “Assigned”).
+- **Client (User)**: I can view a job’s detail page to see progress and final result.
+- **Admin**: I can see all jobs in an admin overview, filter or search them, and potentially override or update status if needed.
 
-## 4.3 Functional Requirements
+## 4.3 Functional Breakdown
 
-1. **Job Attributes**:
+### 4.3.1 Backend
 
-   - **Name** (string, required)
-   - **Description** (text, required)
-   - **Acceptance Criteria** (text, required)
-   - **Status** (enum: Draft, Assigned, In Progress, Completed, Re-submission Required, etc.)
-   - **Created By** (user ID from Clerk)
+- **API Endpoints** (e.g., `/api/jobs`):
+  - **Create Job (POST)**: Creates a new job for an authenticated user.
+  - **List Jobs (GET)**: Returns a paginated list of jobs.
+    - If user is standard, return only that user’s jobs (or public listings if we allow public read).
+    - If user is admin, return all jobs or a suitable subset based on admin query.
+  - **Read/Update Job Details (GET/PUT/PATCH)**:
+    - For standard users, only allow reading or updating jobs they created (unless the job is open/public).
+    - For admins, allow reading/updating any job.
+- **Data Validation**:
+  - Enforce required fields (name, description, acceptance criteria).
 
-2. **Job Creation Flow**:
+### 4.3.2 Frontend (User)
 
-   - Form to input job details.
-   - On submission, store job record in the database.
-   - Status initially set to “Draft” or “Pending Assignment.”
+- **Location**:
+  - `/jobs`: List of all jobs the user can see.
+  - `/jobs/new`: Form to create a new job.
+  - `/jobs/[jobId]`: Detail page for a specific job.
+- **Features**:
+  - **Job Listing**: TanStack Table can be used to display the user’s jobs.
+  - **Job Creation Form**: TanStack Form to handle job creation with fields (name, description, acceptance criteria).
+  - **Job Details**: Show status, assigned agent (if any), final result once completed.
 
-3. **Job Listing**:
+### 4.3.3 Frontend (Admin)
 
-   - Paginated list of jobs.
-   - Filter by status or search by name/keyword.
-   - Sorting options (by creation date, status).
-
-4. **Job Detail Page**:
-   - Show name, description, acceptance criteria, assigned agent (if any), status, result (if completed).
-   - Action buttons (edit job if not assigned, or trigger re-submission if needed).
+- **Location**: `/admin/jobs`
+- **Features**:
+  - **Full Job Listing**: Admin can see all jobs in a table.
+  - **Filters/Sort**: Possibly by status, user, assigned agent, etc.
+  - **Job Detail Management**: Admin can override job statuses if needed (e.g., force re-submission or completion).
+  - **Data Fetching**: Uses TanStack Query to retrieve all jobs with admin privileges.
 
 ## 4.4 Non-Functional Requirements
 
-- **Usability**: Job creation should be straightforward with minimal required fields.
-- **Data Validation**: All required fields must be present before saving.
-- **Scalability**: Should handle a large number of jobs without performance degradation.
+- **Usability**: Simple forms for job creation; minimal friction.
+- **Security**: Clerk-based role checks so standard users cannot access admin routes or manipulate other users’ jobs.
+- **Scalability**: Support large numbers of jobs with table pagination or infinite scroll.
 
 ## 4.5 Success Criteria
 
-- Job creation works reliably.
-- Users can view and manage their jobs.
-- System prevents incomplete job records (e.g., missing name or description).
+- Users can reliably create and manage their own jobs in `/jobs`.
+- Admins can see and manage all jobs in `/admin/jobs`.
+- Data is validated and persisted in the database with correct user associations.

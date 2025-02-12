@@ -1,33 +1,49 @@
-# 5. Feature: Intelligent Agent Matching & Assignment
+# 5. Feature: Intelligent Agent Matching & Assignment (Updated)
 
 ## 5.1 Purpose
 
-When a new job is posted, the platform automatically determines the best agent based on the agent’s profile (capabilities/keywords) and the job’s requirements. OpenAI is used to help refine the matching.
+When a new job is posted (or updated), the platform automatically determines the best agent using the job’s requirements and the agents’ profiles. OpenAI helps refine the matching. **The matching logic is primarily a backend function**, and **admins** can override assignments via the `/admin/jobs` panel if needed.
 
 ## 5.2 User Stories
 
-- **Client**: I post a job and expect the platform to assign it to a capable agent without manual intervention.
-- **System**: It suggests the best agent or multiple possible agents and picks one automatically.
+- **Client (User)**: I post a job and expect the platform to assign it to the most suitable agent automatically.
+- **System**: It suggests the best agent via the backend matching logic and updates the job record.
+- **Admin**: Can manually override or reassign an agent for a given job in the admin interface if the automatic assignment fails or is suboptimal.
 
-## 5.3 Functional Requirements
+## 5.3 Functional Breakdown
 
-1. **Agent Matching Logic**:
-   - Compare job description & acceptance criteria with agent keywords.
-   - Call OpenAI API with a prompt to rank or select the best match from a list of agent profiles.
-   - If multiple matches have the same score, pick the first or fallback to a tie-break rule.
-2. **Automatic Assignment**:
-   - Once the system identifies the best agent, update the job with `assignedAgentId`.
-   - Job status changes to “Assigned” or “In Progress.”
-3. **Manual Override** (Stretch Goal):
-   - Optionally, an admin or client can override the automatic selection with a different agent (not required in MVP but can be considered).
+### 5.3.1 Backend
+
+- **Matching Logic** (in an internal function or within `/api/jobs` endpoints):
+  - Upon creating or updating a job, the server triggers the agent selection process:
+    1. Pull available agents from the database.
+    2. Use OpenAI API with a prompt that includes job details and agent keywords.
+    3. Receive a ranked list or best match from OpenAI.
+    4. Assign the selected agent to the job (`assignedAgentId`).
+  - If the matching fails or returns no suitable agent, handle fallback logic (assign default agent or set job as unassigned).
+- **Admin Override**:
+  - Provide an endpoint (e.g., `/api/admin/jobs/[jobId]/assign`) allowing an admin to update `assignedAgentId` with a new agent.
+
+### 5.3.2 Frontend (User)
+
+- **No Direct Control**: The user just creates or updates a job. The assignment is automatically handled on the backend.
+- **Job Detail View**: The assigned agent is shown, but the user cannot change it directly.
+
+### 5.3.3 Frontend (Admin)
+
+- **Location**: `/admin/jobs`
+  - The admin sees a table of jobs (TanStack Table).
+  - Each job row can provide an “Override Assignment” action, opening a modal or detail page.
+  - Admin selects a new agent from a drop-down (populated by existing agents) and triggers an API call to change the assignment.
 
 ## 5.4 Non-Functional Requirements
 
-- **Performance**: The matching step must be efficient; caching agent data to avoid repetitive calls to OpenAI.
-- **Reliability**: Fallback to a default agent if OpenAI or matching logic fails.
+- **Performance**: The matching step should be optimized with caching or partial matching logic.
+- **Reliability**: If the OpenAI API call fails, a fallback or default assignment is needed.
+- **Traceability**: Log each assignment or override in the job_logs table.
 
 ## 5.5 Success Criteria
 
-- System correctly assigns a relevant agent for each job in most cases.
-- Agent assignment is stored without errors.
-- Minimal time delay for the matching step.
+- Most jobs get a relevant agent assigned automatically with minimal error.
+- Admin panel can override agent assignments when needed.
+- System gracefully handles OpenAI API failures or no-match scenarios.
