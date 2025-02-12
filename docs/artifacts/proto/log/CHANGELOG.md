@@ -1,5 +1,40 @@
 # Development Changelog
 
+## [0.3.3] - 2025-02-13
+
+### Added
+
+- Jobs Management Implementation
+  - CRUD operations for jobs
+  - Public and admin API routes
+  - Job status tracking and logging
+  - Agent assignment functionality
+  - Admin actions (resubmit, complete, reassign)
+  - Type-safe API responses
+  - React Query integration
+  - Loading states and error handling
+
+### Changed
+
+- Enhanced API layer
+  - Added job-specific API endpoints
+  - Improved error handling
+  - Added job logs tracking
+  - Standardized response format
+
+### Technical
+
+- Added new UI components:
+  - Job form component
+  - Job list and detail views
+  - Job status badges
+  - Log viewer component
+- Created service layer:
+  - Jobs service with CRUD operations
+  - Admin-specific job operations
+  - Type definitions for jobs
+  - React Query hooks for data fetching
+
 ## [0.3.2] - 2025-02-12
 
 ### Added
