@@ -1,5 +1,26 @@
 # Development Changelog
 
+## [0.3.0] - 2025-02-12
+
+### Added
+
+- Agent Management Implementation
+  - CRUD operations for AI agents
+  - Admin-only access control
+  - Agent list view with status and job counts
+  - Form validation with Zod
+  - Delete confirmation dialog
+  - SQLite database initialization
+  - Prisma schema and migrations
+  - UI components using shadcn/ui
+  - Error handling and TypeScript improvements
+
+### Implementation Details
+
+- [General Implementation](../implementation/1-general.md)
+- [Authentication Implementation](../implementation/2-auth.md)
+- [Agent Management Implementation](../implementation/3-agents.md)
+
 ## [0.2.0] - 2025-02-11
 
 ### Added
@@ -52,11 +73,11 @@
 
 ### Next Steps
 
-1. Authentication setup [Pending Implementation]
+1. Authentication setup [Completed in 0.2.0]
 2. OpenAI integration [Pending Implementation]
-3. Core UI components [Pending Implementation]
-4. API endpoints [Pending Implementation]
-5. Dashboard implementation [Pending Implementation]
+3. Core UI components [Completed in 0.3.0]
+4. API endpoints [Completed in 0.3.0]
+5. Dashboard implementation [In Progress]
 
 ---
 
