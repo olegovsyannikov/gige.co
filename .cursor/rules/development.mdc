@@ -113,3 +113,8 @@ globs:
     - Do not suggest unnecessary updates.
   </guidelines>
 </what_not_to_do>
+
+<git_instrutions>
+  - Keep commit messages short but informative
+  - After git commit update @CHANGELOG.md and corresponding implementation files
+</git_instrutions>

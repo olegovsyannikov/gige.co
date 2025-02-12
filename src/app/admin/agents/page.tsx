@@ -1,12 +1,12 @@
 import { DeleteAgentButton } from "@/components/agents/delete-agent-button";
 import { Button } from "@/components/ui/button";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";

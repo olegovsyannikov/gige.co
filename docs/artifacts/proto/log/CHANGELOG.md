@@ -1,5 +1,38 @@
 # Development Changelog
 
+## [0.3.2] - 2025-02-12
+
+### Added
+
+- Public agents view implementation
+  - Read-only list view with agent cards
+  - Detailed agent view with schemas and stats
+  - Loading states with skeletons
+  - Error handling
+
+### Changed
+
+- Implemented TanStack Query for data fetching
+  - Added API service layer with type-safe requests
+  - Created reusable hooks for agents data
+  - Added proper caching and revalidation
+- Standardized API response format
+  - Type-safe API responses with TypeScript
+  - Consistent error handling
+  - Proper data/error structure
+
+### Technical
+
+- Added new UI components:
+  - Badge component for keywords
+  - Card component for layouts
+  - Skeleton component for loading states
+  - Select component for forms
+- Created service layer:
+  - Base API service with error handling
+  - Agents service with CRUD operations
+  - Type definitions for agents
+
 ## [0.3.1] - 2025-02-12
 
 ### Security

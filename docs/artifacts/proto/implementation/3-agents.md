@@ -30,10 +30,62 @@ The agent management system provides a secure, admin-only interface for managing
    - Error handling
 
 4. **Delete Dialog**
+
    - Confirmation modal
    - Loading state
    - Error handling
    - Success redirect
+
+5. **Public Views** (New)
+   - Read-only agent list with cards
+   - Detailed agent view with schemas
+   - Loading skeletons
+   - Error states
+
+### API Layer
+
+1. **Base Service**
+
+   ```typescript
+   interface ApiResponse<T> {
+     data: T;
+     error?: {
+       message: string;
+       status: number;
+     };
+   }
+   ```
+
+   - Type-safe requests
+   - Standardized error handling
+   - Consistent response format
+
+2. **Agents Service**
+
+   ```typescript
+   export const agentsApi = {
+     list: () => ApiResponse<AgentListItem[]>,
+     getById: (id: string) => ApiResponse<Agent>,
+     create: (data) => ApiResponse<Agent>,
+     update: (id, data) => ApiResponse<Agent>,
+     delete: (id) => ApiResponse<void>,
+   };
+   ```
+
+3. **React Query Hooks**
+   ```typescript
+   export const {
+     useAgents,
+     useAgent,
+     useCreateAgent,
+     useUpdateAgent,
+     useDeleteAgent,
+   } = ...;
+   ```
+   - Automatic caching
+   - Loading states
+   - Error handling
+   - Optimistic updates
 
 ### Data Models
 
@@ -56,28 +108,15 @@ model Agent {
 
 ### API Endpoints
 
-1. **GET /api/admin/agents**
+1. **Public Endpoints**
 
-   - List all agents with statistics
-   - Admin-only access
-   - Sorted by creation date
+   - GET /api/agents - List active agents
+   - GET /api/agents/[id] - Get single agent
 
-2. **POST /api/admin/agents**
-
-   - Create new agent
-   - Validate input/output schemas
-   - Admin-only access
-
-3. **PUT /api/admin/agents**
-
-   - Update existing agent
-   - Full validation
-   - Admin-only access
-
-4. **DELETE /api/admin/agents/[id]**
-   - Remove agent
-   - Preserve related jobs
-   - Admin-only access
+2. **Admin Endpoints**
+   - POST /api/admin/agents - Create agent
+   - PUT /api/admin/agents - Update agent
+   - DELETE /api/admin/agents/[id] - Remove agent
 
 ### Services
 
@@ -93,10 +132,10 @@ model Agent {
    - SQLite for development
    - Migration management
 
-3. **Form Handling**
-   - React Hook Form
-   - Zod validation
-   - Error management
+3. **Data Fetching**
+   - TanStack Query
+   - Type-safe API layer
+   - Caching strategy
 
 ## Current Status
 
@@ -106,36 +145,37 @@ model Agent {
 - ✅ Form validation
 - ✅ Delete confirmation
 - ✅ Job statistics
-- ⏳ Error notifications
+- ✅ Public views
+- ✅ Loading states
+- ✅ Error handling
+- ⏳ Optimistic updates
 - ❌ Agent testing interface
 
 ## Technical Decisions
 
-1. **SQLite Database**
+1. **API Layer**
 
-   - Simple setup for MVP
-   - Easy deployment
-   - Planned migration to PostgreSQL
+   - Standardized response format
+   - Type-safe requests/responses
+   - Centralized error handling
 
-2. **shadcn/ui Components**
+2. **Data Fetching**
 
-   - Consistent design
-   - Accessibility
-   - Easy customization
+   - TanStack Query for caching
+   - Automatic background updates
+   - Loading/error states
 
-3. **Zod Validation**
-   - Type-safe schemas
-   - Runtime validation
-   - TypeScript integration
+3. **UI Components**
+   - shadcn/ui base
+   - Custom loading skeletons
+   - Responsive design
 
 ## Dependencies
 
+- @tanstack/react-query: Data fetching
 - @clerk/nextjs: Authentication
 - @prisma/client: Database ORM
-- @hookform/resolvers: Form validation
-- @radix-ui/\*: UI primitives
-- @tanstack/react-table: Data tables
-- zod: Schema validation
+- shadcn/ui: UI components
 
 ## Testing Strategy
 
@@ -143,66 +183,47 @@ model Agent {
 
 1. **Components**
 
-   - Form validation
-   - Delete confirmation
-   - Status toggle
-
-2. **API Routes**
-   - Auth checks
-   - Input validation
+   - Loading states
    - Error handling
+   - Data display
+
+2. **API Layer**
+   - Response format
+   - Error handling
+   - Type safety
 
 ### Integration Tests
 
-1. **CRUD Operations**
-
-   - Full agent lifecycle
-   - Role-based access
-   - Error scenarios
-
-2. **Database**
-   - Schema validation
-   - Relationship integrity
-   - Migration testing
+1. **Data Flow**
+   - API to UI updates
+   - Cache invalidation
+   - Error propagation
 
 ## Known Issues
 
 1. **Performance**
 
-   - Large JSON schemas may impact form performance
-   - Consider pagination for agent list
+   - Large JSON schemas
+   - Initial load time
 
-2. **Validation**
-
-   - Complex JSON schema validation needed
-   - Better error messages required
-
-3. **UX**
-   - No loading states for some actions
-   - Missing success notifications
+2. **UX**
+   - Loading flash on navigation
+   - Error recovery UX
 
 ## Future Improvements
 
 1. **Features**
 
-   - Batch operations
-   - Agent templates
-   - Version history
-   - Search and filtering
+   - Optimistic updates
+   - Infinite scrolling
+   - Search/filter
 
 2. **Performance**
-
-   - Optimistic updates
-   - Caching strategy
-   - Pagination
-
-3. **UX**
-   - Toast notifications
-   - Inline editing
-   - Drag-and-drop reordering
-   - Rich text editor for descriptions
+   - Response caching
+   - Prefetching
+   - Code splitting
 
 ---
 
 Last Updated: 2025-02-12
-Version: 0.3.0
+Version: 0.3.2
