@@ -1,5 +1,22 @@
 # Development Changelog
 
+## [0.3.1] - 2025-02-12
+
+### Security
+
+- Enhanced authentication system
+  - Added centralized admin authorization checks
+  - Implemented double-layered auth protection (middleware + API)
+  - Created reusable auth utilities
+  - Standardized error responses across all admin endpoints
+  - Improved role-based access control
+
+### Changed
+
+- Refactored admin API routes to use centralized auth checks
+- Updated middleware to verify admin role using session claims
+- Standardized API error response format
+
 ## [0.3.0] - 2025-02-12
 
 ### Added

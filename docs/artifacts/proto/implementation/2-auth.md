@@ -2,7 +2,7 @@
 
 ## Overview
 
-Authentication is implemented using Clerk, providing secure user management and session handling. The implementation follows Next.js 15 best practices with App Router and server components.
+Authentication is implemented using Clerk, providing secure user management and session handling. The implementation follows Next.js 15 best practices with App Router and server components. The system implements a double-layered protection mechanism with both middleware and API-level authorization checks.
 
 ## Architecture
 
@@ -16,6 +16,8 @@ src/
 │   │   ├── sign-in/       # Sign-in flow
 │   │   └── sign-up/       # Sign-up flow
 │   └── dashboard/         # Protected routes
+├── lib/
+│   └── auth.ts           # Centralized auth utilities
 ├── providers/            # Auth context providers
 └── middleware.ts        # Route protection
 ```
@@ -27,17 +29,27 @@ src/
    - Protects routes using Clerk's middleware
    - Handles public and protected route patterns
    - Manages API route authentication
+   - Verifies admin role using session claims
+   - Early rejection of unauthorized access
 
-2. **Auth Layout**
+2. **Auth Utilities**
+
+   - Centralized auth checks in `lib/auth.ts`
+   - Reusable admin authorization function
+   - Standardized error responses
+   - Role-based access control helpers
+
+3. **Auth Layout**
 
    - Provides consistent authentication UI
    - Centers content with responsive design
    - Minimal styling for Clerk components
 
-3. **Protected Dashboard**
+4. **Protected Dashboard**
    - Server-side user data fetching
    - User profile management
    - Sign-out functionality
+   - Role-based access restrictions
 
 ## Configuration
 
@@ -63,22 +75,32 @@ Required environment variables:
 
 ## Security Features
 
-1. **Route Protection**
+1. **Double-Layered Protection**
+
+   - Middleware-level route protection
+   - API-level authorization checks
+   - Consistent error handling
+   - Role verification at both levels
+
+2. **Route Protection**
 
    - Middleware-based access control
    - Public routes whitelist
    - API route protection
+   - Admin-only route restrictions
 
-2. **User Security**
+3. **User Security**
 
    - CSRF protection
    - Secure session cookies
    - Rate limiting
+   - Role-based permissions
 
-3. **Data Safety**
+4. **Data Safety**
    - Server-side user validation
    - Protected user metadata
    - Secure token rotation
+   - Admin role verification
 
 ## Next Steps
 
