@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
+import { ApiResponse } from "@/services/api";
 import { AgentListItem } from "@/types/agent";
 import Link from "next/link";
 
-async function getAgents(): Promise<AgentListItem[]> {
+async function getAgents(): Promise<ApiResponse<AgentListItem[]>> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/agents`, {
     next: { revalidate: 60 }, // Cache for 1 minute
   });
@@ -15,7 +16,8 @@ async function getAgents(): Promise<AgentListItem[]> {
 }
 
 export default async function AgentsPage() {
-  const agents = await getAgents();
+  const response = await getAgents();
+  const agents = response.data;
 
   return (
     <div className="container mx-auto p-6">
