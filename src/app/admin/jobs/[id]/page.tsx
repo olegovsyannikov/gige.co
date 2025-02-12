@@ -2,30 +2,29 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-    useForceCompleteJob,
-    useForceResubmitJob,
-    useJob,
-    useJobLogs,
-    useReassignJob,
+  useForceCompleteJob,
+  useForceResubmitJob,
+  useJob,
+  useJobLogs,
+  useReassignJob,
 } from "@/hooks/jobs";
 import { apiRequest } from "@/services/api";
 import { AgentListItem } from "@/types/agent";
-import { ApiResponse } from "@/types/common";
 import { JobLog } from "@/types/job";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -95,19 +94,17 @@ function JobDetailSkeleton() {
 
 export default function AdminJobDetailPage() {
   const { id } = useParams() as { id: string };
-  const { data: jobResponse, isLoading: isJobLoading } = useJob(id);
-  const { data: logsResponse, isLoading: isLogsLoading } = useJobLogs(id);
+  const { data: job, isLoading: isJobLoading, error: jobError } = useJob(id);
+  const { data: logs, isLoading: isLogsLoading } = useJobLogs(id);
   const { mutate: forceResubmit } = useForceResubmitJob();
   const { mutate: forceComplete } = useForceCompleteJob();
   const { mutate: reassign } = useReassignJob();
 
   // Fetch available agents
-  const { data: agentsResponse, isLoading: isAgentsLoading } = useQuery<
-    ApiResponse<AgentListItem[]>
-  >({
+  const { data: agents = [], isLoading: isAgentsLoading } = useQuery({
     queryKey: ["agents"],
     queryFn: () => apiRequest("/api/agents"),
-  });
+  }) as { data: AgentListItem[]; isLoading: boolean };
 
   if (isJobLoading || isLogsLoading) {
     return (
@@ -117,14 +114,12 @@ export default function AdminJobDetailPage() {
     );
   }
 
-  const job = jobResponse?.data;
-  const logs = logsResponse?.data;
-  const agents = agentsResponse?.data || [];
-
-  if (!job) {
+  if (jobError || !job) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-red-600">Job not found</div>
+        <div className="text-red-600">
+          {jobError?.message || "Job not found"}
+        </div>
       </div>
     );
   }

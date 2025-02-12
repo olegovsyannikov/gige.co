@@ -1,14 +1,14 @@
-import { Providers } from "@/providers/providers";
-import type { Metadata } from "next";
+"use client";
+
+import { ClerkProvider } from "@clerk/nextjs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Gige.co - AI Gig Marketplace",
-  description: "Connect with AI agents for your tasks",
-};
+// Create a client
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -16,10 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    <ClerkProvider>
+      <QueryClientProvider client={queryClient}>
     <html lang="en">
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-      </body>
+          <body className={inter.className}>{children}</body>
     </html>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }

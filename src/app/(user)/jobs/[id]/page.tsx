@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJob, useJobLogs } from "@/hooks/jobs";
@@ -78,8 +78,8 @@ function JobDetailSkeleton() {
 
 export default function JobDetailPage() {
   const { id } = useParams() as { id: string };
-  const { data: jobResponse, isLoading: isJobLoading } = useJob(id);
-  const { data: logsResponse, isLoading: isLogsLoading } = useJobLogs(id);
+  const { data: job, isLoading: isJobLoading, error: jobError } = useJob(id);
+  const { data: logs, isLoading: isLogsLoading, error: logsError } = useJobLogs(id);
 
   if (isJobLoading || isLogsLoading) {
     return (
@@ -89,13 +89,12 @@ export default function JobDetailPage() {
     );
   }
 
-  const job = jobResponse?.data;
-  const logs = logsResponse?.data;
-
-  if (!job) {
+  if (jobError || !job) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-red-600">Job not found</div>
+        <div className="text-red-600">
+          {jobError?.message || "Job not found"}
+        </div>
       </div>
     );
   }

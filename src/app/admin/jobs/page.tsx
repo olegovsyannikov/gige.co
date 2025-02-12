@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { useAllJobs, useForceResubmitJob } from "@/hooks/jobs";
 import { JobListItem } from "@/types/job";
@@ -78,7 +78,7 @@ function JobTableSkeleton() {
 }
 
 export default function AdminJobsPage() {
-  const { data: response, isLoading, error } = useAllJobs();
+  const { data: jobs, isLoading, error } = useAllJobs();
   const { mutate: forceResubmit } = useForceResubmitJob();
 
   if (error) {
@@ -101,6 +101,8 @@ export default function AdminJobsPage() {
 
         {isLoading ? (
           <JobTableSkeleton />
+        ) : !jobs?.length ? (
+          <div className="text-muted-foreground">No jobs found</div>
         ) : (
           <Table>
             <TableHeader>
@@ -114,7 +116,7 @@ export default function AdminJobsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {response?.data.map((job) => (
+              {jobs.map((job) => (
                 <TableRow key={job.id}>
                   <TableCell>
                     <Link

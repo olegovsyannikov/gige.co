@@ -5,10 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const { userId } = await auth();
+    const { id } = await Promise.resolve(context.params);
 
     if (!userId) {
       return NextResponse.json(
@@ -22,13 +23,28 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    // Find the user in our database
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "User not found",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      );
+    }
 
     // First check if the user has access to this job
     const job = await prisma.job.findUnique({
       where: {
         id,
-        createdByUserId: userId,
+        createdByUserId: user.id,
       },
     });
 

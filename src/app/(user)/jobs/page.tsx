@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJobs } from "@/hooks/jobs";
@@ -89,15 +89,7 @@ function JobCardSkeleton() {
 }
 
 export default function JobsPage() {
-  const { data: response, isLoading, error } = useJobs();
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="text-red-600">Error loading jobs: {error.message}</div>
-      </div>
-    );
-  }
+  const { data: jobs, isLoading, error } = useJobs();
 
   return (
     <div className="container mx-auto p-6">
@@ -114,17 +106,39 @@ export default function JobsPage() {
           </Link>
         </div>
 
-        <div className="grid gap-6">
-          {isLoading ? (
-            <>
-              <JobCardSkeleton />
-              <JobCardSkeleton />
-              <JobCardSkeleton />
-            </>
-          ) : (
-            response?.data.map((job) => <JobCard key={job.id} job={job} />)
-          )}
-        </div>
+        {error ? (
+          <Card className="bg-red-50">
+            <CardHeader>
+              <CardTitle className="text-red-600">Error</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-600">
+                {error.message || "Failed to load jobs"}
+              </p>
+            </CardContent>
+          </Card>
+        ) : isLoading ? (
+          <div className="grid gap-6">
+            <JobCardSkeleton />
+            <JobCardSkeleton />
+            <JobCardSkeleton />
+          </div>
+        ) : !jobs?.length ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>No Jobs Found</CardTitle>
+              <CardDescription>
+                You haven&apos;t created any jobs yet. Click the button above to get started.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {jobs.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
