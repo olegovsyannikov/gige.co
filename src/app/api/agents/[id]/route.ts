@@ -7,9 +7,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = await Promise.resolve(params);
+
     const agent = await prisma.agent.findUnique({
       where: {
-        id: params.id,
+        id,
         isActive: true,
       },
       include: {
