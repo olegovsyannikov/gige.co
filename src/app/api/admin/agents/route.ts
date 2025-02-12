@@ -1,5 +1,5 @@
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -17,22 +17,8 @@ const agentSchema = z.object({
 // GET /api/admin/agents
 export async function GET(req: NextRequest) {
   try {
-    const { userId, sessionClaims } = getAuth(req);
-
-    if (
-      !userId ||
-      !sessionClaims?.metadata ||
-      typeof sessionClaims.metadata !== "object"
-    ) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const metadata = sessionClaims.metadata as { role?: string };
-    const isAdmin = metadata.role === "admin";
-
-    if (!isAdmin) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
 
     const agents = await prisma.agent.findMany({
       orderBy: {
@@ -43,8 +29,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(agents);
   } catch (error: unknown) {
     console.error("Error fetching agents:", error);
-    return new NextResponse(
-      error instanceof Error ? error.message : "Internal error",
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -53,46 +42,61 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/agents
 export async function POST(req: NextRequest) {
   try {
-    const { userId, sessionClaims } = getAuth(req);
-
-    if (
-      !userId ||
-      !sessionClaims?.metadata ||
-      typeof sessionClaims.metadata !== "object"
-    ) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const metadata = sessionClaims.metadata as { role?: string };
-    const isAdmin = metadata.role === "admin";
-
-    if (!isAdmin) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
 
     const json = await req.json();
-    const body = agentSchema.parse(json);
 
-    const agent = await prisma.agent.create({
-      data: {
-        name: body.name,
-        description: body.description,
-        endpointURL: body.endpointURL,
-        inputSchema: body.inputSchema,
-        outputSchema: body.outputSchema,
-        keywords: body.keywords,
-        isActive: body.isActive,
-      },
-    });
+    try {
+      const body = agentSchema.parse(json);
 
-    return NextResponse.json(agent);
+      // Validate JSON schemas
+      try {
+        if (typeof body.inputSchema !== "object") {
+          throw new Error("Input schema must be a valid JSON object");
+        }
+        if (typeof body.outputSchema !== "object") {
+          throw new Error("Output schema must be a valid JSON object");
+        }
+      } catch (error) {
+        return NextResponse.json(
+          {
+            message:
+              error instanceof Error ? error.message : "Invalid JSON schema",
+          },
+          { status: 400 }
+        );
+      }
+
+      const agent = await prisma.agent.create({
+        data: {
+          name: body.name,
+          description: body.description,
+          endpointURL: body.endpointURL,
+          inputSchema: body.inputSchema,
+          outputSchema: body.outputSchema,
+          keywords: body.keywords,
+          isActive: body.isActive,
+        },
+      });
+
+      return NextResponse.json(agent);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { message: error.errors[0].message },
+          { status: 422 }
+        );
+      }
+      throw error;
+    }
   } catch (error: unknown) {
     console.error("Error creating agent:", error);
-    if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid request data", { status: 422 });
-    }
-    return new NextResponse(
-      error instanceof Error ? error.message : "Internal error",
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -101,28 +105,17 @@ export async function POST(req: NextRequest) {
 // PUT /api/admin/agents
 export async function PUT(req: NextRequest) {
   try {
-    const { userId, sessionClaims } = getAuth(req);
-
-    if (
-      !userId ||
-      !sessionClaims?.metadata ||
-      typeof sessionClaims.metadata !== "object"
-    ) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const metadata = sessionClaims.metadata as { role?: string };
-    const isAdmin = metadata.role === "admin";
-
-    if (!isAdmin) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
 
     const json = await req.json();
     const body = agentSchema.parse(json);
 
     if (!body.id) {
-      return new NextResponse("Agent ID is required", { status: 400 });
+      return NextResponse.json(
+        { message: "Agent ID is required" },
+        { status: 400 }
+      );
     }
 
     const agent = await prisma.agent.update({
@@ -142,10 +135,16 @@ export async function PUT(req: NextRequest) {
   } catch (error: unknown) {
     console.error("Error updating agent:", error);
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid request data", { status: 422 });
+      return NextResponse.json(
+        { message: error.errors[0].message },
+        { status: 422 }
+      );
     }
-    return new NextResponse(
-      error instanceof Error ? error.message : "Internal error",
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }

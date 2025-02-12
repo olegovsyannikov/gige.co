@@ -1,5 +1,5 @@
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
@@ -7,22 +7,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { userId, sessionClaims } = getAuth(req);
-
-    if (
-      !userId ||
-      !sessionClaims?.metadata ||
-      typeof sessionClaims.metadata !== "object"
-    ) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const metadata = sessionClaims.metadata as { role?: string };
-    const isAdmin = metadata.role === "admin";
-
-    if (!isAdmin) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
 
     await prisma.agent.delete({
       where: { id: params.id },
@@ -31,8 +17,11 @@ export async function DELETE(
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
     console.error("Error deleting agent:", error);
-    return new NextResponse(
-      error instanceof Error ? error.message : "Internal error",
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }

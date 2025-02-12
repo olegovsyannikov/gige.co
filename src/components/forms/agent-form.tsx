@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Agent } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -31,9 +32,27 @@ const agentFormSchema = z.object({
   }),
   inputSchema: z.string().min(2, {
     message: "Input schema is required.",
+  }).refine((val) => {
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, {
+    message: "Must be valid JSON",
   }),
   outputSchema: z.string().min(2, {
     message: "Output schema is required.",
+  }).refine((val) => {
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, {
+    message: "Must be valid JSON",
   }),
   keywords: z.string().min(2, {
     message: "At least one keyword is required.",
@@ -49,6 +68,9 @@ interface AgentFormProps {
 
 export function AgentForm({ agent }: AgentFormProps) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<AgentFormValues>({
     resolver: zodResolver(agentFormSchema),
     defaultValues: agent
@@ -69,7 +91,9 @@ export function AgentForm({ agent }: AgentFormProps) {
   });
 
   async function onSubmit(data: AgentFormValues) {
+    setError(null);
     try {
+      setIsSubmitting(true);
       const response = await fetch("/api/admin/agents", {
         method: agent ? "PUT" : "POST",
         headers: {
@@ -84,20 +108,29 @@ export function AgentForm({ agent }: AgentFormProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save agent");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "Failed to save agent");
       }
 
       router.push("/admin/agents");
       router.refresh();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error saving agent:", error);
-      // TODO: Add proper error handling UI
+      setError(error instanceof Error ? error.message : "Failed to save agent");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {error && (
+          <div className="p-4 mb-4 text-sm text-red-800 bg-red-50 rounded-lg">
+            {error}
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="name"
@@ -231,8 +264,8 @@ export function AgentForm({ agent }: AgentFormProps) {
           )}
         />
 
-        <Button type="submit">
-          {agent ? "Update Agent" : "Create Agent"}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : agent ? "Update Agent" : "Create Agent"}
         </Button>
       </form>
     </Form>
