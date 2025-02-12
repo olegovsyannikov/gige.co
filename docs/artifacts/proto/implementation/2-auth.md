@@ -2,244 +2,122 @@
 
 ## Overview
 
-Authentication is implemented using Clerk, providing secure user management and session handling. The implementation follows Next.js 15 best practices with App Router and server components. The system implements a double-layered protection mechanism with both middleware and API-level authorization checks.
+Authentication is implemented using Clerk, providing secure user management and session handling. The system implements a double-layered protection mechanism with both middleware and API-level authorization checks, including role-based access control for admin features.
 
-## Architecture
+## Technical Implementation
 
-### Directory Structure
+### Components
 
-```
-src/
-├── app/
-│   ├── auth/              # Authentication routes
-│   │   ├── layout.tsx     # Shared auth layout
-│   │   ├── sign-in/       # Sign-in flow
-│   │   └── sign-up/       # Sign-up flow
-│   └── dashboard/         # Protected routes
-├── lib/
-│   └── auth.ts           # Centralized auth utilities
-├── providers/            # Auth context providers
-└── middleware.ts        # Route protection
-```
+1. **Auth UI**
 
-### Key Components
+   - `SignIn`: Clerk-based sign-in component
+   - `SignUp`: User registration flow
+   - `UserButton`: Profile and session management
+   - `AuthLayout`: Shared authentication layout
+
+2. **Protected Components**
+   - `AdminGuard`: Admin-only route protection
+   - `UserGuard`: Authenticated user protection
+   - `RoleIndicator`: Visual role status display
+
+### Auth Layer
 
 1. **Middleware**
 
-   - Protects routes using Clerk's middleware
-   - Handles public and protected route patterns
-   - Manages API route authentication
-   - Verifies admin role using session claims
-   - Early rejection of unauthorized access
+   ```typescript
+   export default authMiddleware({
+     publicRoutes: ["/", "/api/public(.*)"],
+     adminRoutes: ["/admin(.*)"],
+     afterAuth: (auth, req) => {
+       // Role verification and route protection
+     },
+   });
+   ```
 
-2. **Auth Utilities**
+2. **API Protection**
+   ```typescript
+   export async function validateAdmin(userId: string) {
+     const user = await clerkClient.users.getUser(userId);
+     return user?.publicMetadata?.role === "admin";
+   }
+   ```
 
-   - Centralized auth checks in `lib/auth.ts`
-   - Reusable admin authorization function
-   - Standardized error responses
-   - Role-based access control helpers
+### Services
 
-3. **Auth Layout**
+```typescript
+// Auth Utilities
+export const authUtils = {
+  validateAdmin: (userId: string) => Promise<boolean>,
+  getUserRole: (userId: string) => Promise<UserRole>,
+  updateUserRole: (userId: string, role: UserRole) => Promise<void>,
+};
 
-   - Provides consistent authentication UI
-   - Centers content with responsive design
-   - Minimal styling for Clerk components
+// Role Types
+export type UserRole = "user" | "admin" | "agent";
 
-4. **Protected Dashboard**
-   - Server-side user data fetching
-   - User profile management
-   - Sign-out functionality
-   - Role-based access restrictions
+// Session Management
+export const sessionUtils = {
+  getSession: () => Promise<Session>,
+  validateSession: (token: string) => Promise<boolean>,
+  revokeSession: (sessionId: string) => Promise<void>,
+};
+```
 
-## Configuration
+## Current Status
 
-### Environment Setup
+- ✅ User authentication
+- ✅ Role-based access
+- ✅ API protection
+- ✅ Admin routes
+- ✅ Session management
+- ⏳ Role management UI
+- ❌ OAuth providers
+- ❌ Advanced permissions
 
-Required environment variables:
+## Technical Decisions
 
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Public key for client-side
-- `CLERK_SECRET_KEY`: Secret key for server-side
+1. **Clerk Integration**
 
-### Authentication Flow
+   - Built-in user management
+   - Secure session handling
+   - OAuth provider support
+   - Role management
 
-1. **User Journey**
+2. **Protection Strategy**
 
-   - Landing page with sign-in/sign-up options
-   - OAuth or email/password authentication
-   - Redirect to dashboard on success
+   - Middleware-first approach
+   - Double-layered verification
+   - Role-based routing
+   - API-level checks
 
-2. **Session Management**
-   - Automatic session persistence
-   - Secure token handling
+3. **Session Handling**
+   - Secure token storage
+   - Automatic token rotation
    - Cross-tab synchronization
 
-## Security Features
+## Known Issues
 
-1. **Double-Layered Protection**
+1. Limited role management
+2. Basic permission system
+3. No OAuth providers
+4. Missing audit logs
 
-   - Middleware-level route protection
-   - API-level authorization checks
-   - Consistent error handling
-   - Role verification at both levels
+## Future Improvements
 
-2. **Route Protection**
+1. **Features**
 
-   - Middleware-based access control
-   - Public routes whitelist
-   - API route protection
-   - Admin-only route restrictions
+   - OAuth integration
+   - Permission system
+   - Role management UI
+   - Session monitoring
 
-3. **User Security**
-
-   - CSRF protection
-   - Secure session cookies
-   - Rate limiting
-   - Role-based permissions
-
-4. **Data Safety**
-   - Server-side user validation
-   - Protected user metadata
-   - Secure token rotation
-   - Admin role verification
-
-## Next Steps
-
-1. [ ] User Profile Enhancement
-
-   - Custom fields
-   - Profile image upload
-   - User preferences
-
-2. [ ] Access Control
-
-   - Role-based permissions
-   - Resource-level access
-   - Admin dashboard
-
-3. [ ] Security Improvements
-
+2. **Security**
    - 2FA implementation
-   - Email verification
-   - Password policies
-
-4. [ ] User Experience
-   - Custom error pages
-   - Loading states
-   - Success notifications
-
-## Testing Guidelines
-
-### Unit Tests
-
-1. **Auth Components**
-
-   - Test layout rendering
-   - Verify protected route behavior
-   - Validate auth state management
-
-2. **Middleware Tests**
-
-   - Public route access
-   - Protected route redirects
-   - API route protection
-
-3. **User Session Tests**
-   - Sign-in flow
-   - Sign-out behavior
-   - Token management
-
-### Integration Tests
-
-1. **Authentication Flow**
-
-   - Complete sign-up process
-   - OAuth provider integration
-   - Session persistence
-
-2. **Protected Resources**
-
-   - Dashboard access control
-   - API endpoint protection
-   - User data fetching
-
-3. **Error Scenarios**
-   - Invalid credentials
-   - Expired sessions
-   - Network failures
-
-### E2E Testing
-
-1. **User Journeys**
-
-   - Sign-up to dashboard flow
-   - Profile management
-   - Session handling
-
-2. **Cross-browser Testing**
-   - Desktop browsers
-   - Mobile responsiveness
-   - Cookie behavior
-
-## Troubleshooting Guide
-
-### Common Issues
-
-1. **Authentication Failures**
-
-   - Verify environment variables
-   - Check Clerk dashboard configuration
-   - Validate API key permissions
-
-2. **Session Problems**
-
-   - Clear browser cache and cookies
-   - Check token expiration
-   - Verify middleware configuration
-
-3. **OAuth Integration**
-   - Confirm provider setup in Clerk
-   - Validate callback URLs
-   - Check CORS settings
-
-### Debug Strategies
-
-1. **Client-side**
-
-   - Browser console logs
-   - Network request inspection
-   - React DevTools for state
-
-2. **Server-side**
-
-   - Middleware logging
-   - API route debugging
-   - Session token validation
-
-3. **Development Tools**
-   - Clerk development logs
-   - Next.js debugging
-   - Network monitoring
-
-### Error Resolution
-
-1. **Build Errors**
-
-   - Clear `.next` cache
-   - Rebuild node modules
-   - Check TypeScript types
-
-2. **Runtime Errors**
-
-   - Verify route protection
-   - Check component mounting
-   - Validate data fetching
-
-3. **Deployment Issues**
-   - Environment variable setup
-   - Build configuration
-   - Production vs development settings
+   - Enhanced audit logging
+   - IP-based restrictions
+   - Rate limiting
 
 ---
 
-Last Updated: 2025-02-11
-Version: 0.2.0
+Last Updated: 2025-02-13
+Version: 0.3.3

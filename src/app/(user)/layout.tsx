@@ -2,29 +2,29 @@
 
 import { Navbar } from "@/components/layout/navbar";
 
-const adminNavItems = [
+const userNavItems = [
   {
     label: "Dashboard",
-    href: "/admin",
+    href: "/dashboard",
   },
   {
     label: "Jobs",
-    href: "/admin/jobs",
+    href: "/jobs",
   },
   {
     label: "Agents",
-    href: "/admin/agents",
+    href: "/agents",
   },
 ];
 
-export default function AdminLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar items={adminNavItems} title="Admin Panel" />
+      <Navbar items={userNavItems} title="AI Jobs Platform" />
       <main className="flex-1">{children}</main>
     </div>
   );

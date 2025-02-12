@@ -1,110 +1,149 @@
 # General Implementation Details
 
-> Implementation status tracked in the [changelog](../log/CHANGELOG.md).
+## Overview
 
-## Project Structure
+The project implements an AI job processing platform using modern web technologies. It provides a scalable architecture for managing AI agents, jobs, and user interactions through a secure and performant web interface.
 
-### Technology Stack Implementation
+## Technical Implementation
 
-- **Next.js 14**: Using App Router for better server-side rendering and routing
-- **TypeScript**: Strict mode enabled for better type safety
-- **TailwindCSS**: Configured with custom theme matching design requirements
-- **Shadcn UI**: New York style with neutral color scheme
-- **Prisma**: Set up with SQLite for MVP phase
-- **Clerk**: To be implemented for authentication
-- **OpenAI**: To be integrated for agent matching
+### Technology Stack
 
-### Directory Structure
+1. **Frontend**
+
+   - Next.js 14 App Router
+   - TypeScript with strict mode
+   - TailwindCSS with custom theme
+   - Shadcn UI components
+   - TanStack Query for data fetching
+
+2. **Backend**
+   - Next.js API routes
+   - Prisma ORM
+   - SQLite database (MVP phase)
+   - Clerk authentication
+   - OpenAI integration
+
+### Project Structure
 
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── auth/              # Authentication routes
-│   │   ├── sign-in/       # Sign in page
-│   │   └── sign-up/       # Sign up page
-│   ├── dashboard/         # Protected dashboard routes
+│   ├── (user)/            # User routes
+│   │   ├── dashboard/     # User dashboard
 │   │   ├── jobs/         # Job management
-│   │   ├── agents/       # Agent management
-│   │   └── profile/      # User profile
-│   └── api/              # API routes
-│       ├── jobs/         # Job-related endpoints
-│       ├── agents/       # Agent-related endpoints
-│       └── auth/         # Auth-related endpoints
+│   │   └── agents/       # Agent viewing
+│   ├── admin/            # Admin routes
+│   │   ├── jobs/        # Job administration
+│   │   └── agents/      # Agent management
+│   └── api/             # API routes
+│       ├── jobs/        # Job endpoints
+│       └── agents/      # Agent endpoints
 ├── components/
 │   ├── ui/              # Shadcn UI components
 │   ├── forms/           # Form components
-│   └── layouts/         # Layout components
+│   └── layout/          # Layout components
 ├── lib/
-│   └── services/        # Business logic
-│       ├── ai/          # OpenAI integration
-│       ├── agents/      # Agent management
-│       └── jobs/        # Job management
-└── types/               # TypeScript types
+│   ├── prisma.ts        # Database client
+│   └── utils/           # Shared utilities
+├── types/               # TypeScript types
+└── services/           # API services
 ```
 
-## Database Schema Implementation
+### Database Schema
 
-- Implemented using Prisma with SQLite
-- Schema defined in `prisma/schema.prisma`
-- Models:
-  - User (integrated with Clerk)
-  - Agent (with JSON schemas)
-  - Job (with status tracking)
-  - JobLog (for audit trail)
+Core models and their relationships:
+
+```prisma
+model User {
+  id        String   @id
+  name      String?
+  email     String
+  jobs      Job[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Agent {
+  id           String   @id @default(cuid())
+  name         String
+  isActive     Boolean  @default(true)
+  jobs         Job[]
+  jobLogs      JobLog[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Job and JobLog models defined in jobs implementation
+```
+
+### Core Services
+
+1. **API Layer**
+
+   - Type-safe request/response handling
+   - Standardized error format
+   - Authentication middleware
+   - Rate limiting
+
+2. **Database**
+   - Connection pooling
+   - Transaction support
+   - Migration management
+   - Type generation
 
 ## Current Status
 
-- ✅ Basic project structure
-- ✅ Database schema
-- ✅ Development environment
-- ⏳ Authentication implementation
-- ⏳ API routes
-- ⏳ UI components
-- ⏳ OpenAI integration
+- ✅ Project structure
+- ✅ Core dependencies
+- ✅ Database setup
+- ✅ Authentication
+- ✅ Base components
+- ⏳ API documentation
+- ❌ Production deployment
+- ❌ Monitoring setup
 
 ## Technical Decisions
 
-1. **SQLite Choice**:
+1. **Architecture**
 
-   - Suitable for MVP phase
-   - Easy deployment with Vercel
-   - Can be migrated to PostgreSQL later
+   - App Router for better SEO
+   - API routes for simplicity
+   - SQLite for MVP phase
 
-2. **App Router**:
+2. **Development**
 
-   - Better SEO capabilities
-   - Built-in API routes
-   - Server components for performance
+   - TypeScript for type safety
+   - Prisma for type generation
+   - TanStack for data management
 
-3. **Shadcn UI**:
-   - Customizable components
-   - Accessibility built-in
-   - Consistent design system
-
-## Dependencies
-
-- Next.js 14
-- TypeScript
-- TailwindCSS
-- Shadcn UI
-- Prisma
-- Clerk (pending)
-- OpenAI (pending)
+3. **UI/UX**
+   - Shadcn UI for consistency
+   - TailwindCSS for styling
+   - Mobile-first approach
 
 ## Known Issues
 
-- Authentication not yet implemented
-- OpenAI integration pending
-- UI components need to be built
+1. Development-only database
+2. Limited error handling
+3. Missing API documentation
+4. No monitoring solution
 
 ## Future Improvements
 
-- Migration to PostgreSQL for production
-- Enhanced error handling
-- Performance monitoring
-- Analytics integration
+1. **Infrastructure**
+
+   - PostgreSQL migration
+   - Docker containerization
+   - CI/CD pipeline
+   - Monitoring setup
+
+2. **Development**
+   - API documentation
+   - E2E testing
+   - Performance monitoring
+   - Error tracking
 
 ---
 
-Last Updated: 2024-02-11
-Version: 0.1.0
+Last Updated: 2025-02-13
+Version: 0.3.3

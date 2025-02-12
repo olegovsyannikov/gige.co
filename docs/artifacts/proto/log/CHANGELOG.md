@@ -13,6 +13,17 @@
   - Type-safe API responses
   - React Query integration
   - Loading states and error handling
+- Navigation System
+  - Shared Navbar component
+  - Admin-specific navigation
+  - User-specific navigation
+  - Active route highlighting
+  - Responsive design
+- Admin Dashboard
+  - Overview metrics and stats
+  - System status monitoring
+  - Recent activity tracking
+  - Responsive card layout
 
 ### Changed
 
@@ -21,6 +32,15 @@
   - Improved error handling
   - Added job logs tracking
   - Standardized response format
+- Updated layouts
+  - Added navigation to admin panel
+  - Added navigation to user panel
+  - Improved overall UI structure
+- Route Organization
+  - Implemented route groups with (user) prefix
+  - Separated admin and user routes
+  - Improved route structure and organization
+  - Added shared layouts for each section
 
 ### Technical
 
@@ -29,6 +49,8 @@
   - Job list and detail views
   - Job status badges
   - Log viewer component
+  - Navbar component with role-based navigation
+  - Dashboard cards and metrics
 - Created service layer:
   - Jobs service with CRUD operations
   - Admin-specific job operations

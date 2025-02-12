@@ -1,8 +1,8 @@
-# Jobs Management Implementation Details
+# Jobs Management Implementation
 
 ## Overview
 
-The Jobs module provides a comprehensive system for managing AI tasks within the platform. It enables users to create jobs, track their progress, and allows administrators to manage and oversee all jobs in the system. The implementation includes both public and admin-specific features, with robust error handling and real-time status updates.
+The Jobs module provides a comprehensive system for managing AI tasks within the platform. It enables users to create and track jobs, while allowing administrators to manage and oversee all jobs in the system. The implementation includes job status tracking, logging, and agent assignment capabilities.
 
 ## Technical Implementation
 
@@ -10,97 +10,98 @@ The Jobs module provides a comprehensive system for managing AI tasks within the
 
 1. **Job Management UI**
 
-   - `JobForm`: Component for creating and editing jobs
-   - `JobList`: Displays jobs in a paginated table
-   - `JobDetail`: Shows detailed job information and logs
-   - `JobLogItem`: Renders individual job log entries
-   - `JobStatusBadge`: Visual indicator of job status
+   - `JobForm`: Create/edit job with validation
+   - `JobList`: Paginated job table with filters
+   - `JobDetail`: Job information and logs viewer
+   - `JobLogItem`: Individual log entry display
+   - `JobStatusBadge`: Status indicator component
 
 2. **Admin Components**
-   - `AdminJobList`: Enhanced job list with admin actions
-   - `AdminJobDetail`: Detailed view with admin controls
-   - `AgentSelection`: Component for reassigning jobs to agents
+   - `AdminJobList`: Enhanced list with admin actions
+   - `AdminJobDetail`: Admin controls and metrics
+   - `JobMetrics`: System-wide job statistics
+   - `JobActionButtons`: Resubmit/Complete/Reassign controls
 
 ### Data Models
 
-1. **Job**
+```prisma
+model Job {
+  id                String    @id @default(cuid())
+  name              String
+  description       String
+  acceptanceCriteria String
+  status            JobStatus @default(PENDING)
+  result            Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  userId            String
+  assignedAgentId   String?
+  logs              JobLog[]
+  user              User      @relation(fields: [userId], references: [id])
+  agent             Agent?    @relation(fields: [assignedAgentId], references: [id])
+}
 
-   ```prisma
-   model Job {
-     id                String    @id @default(cuid())
-     name              String
-     description       String
-     acceptanceCriteria String
-     status            JobStatus @default(PENDING)
-     result            Json?
-     createdAt         DateTime  @default(now())
-     updatedAt         DateTime  @updatedAt
-     userId            String
-     assignedAgentId   String?
-     logs              JobLog[]
-     user              User      @relation(fields: [userId], references: [id])
-     agent             Agent?    @relation(fields: [assignedAgentId], references: [id])
-   }
-   ```
+model JobLog {
+  id              String    @id @default(cuid())
+  jobId           String
+  status          JobStatus
+  message         String?
+  requestPayload  Json?
+  responsePayload Json?
+  agentId         String?
+  createdAt       DateTime  @default(now())
+  job             Job       @relation(fields: [jobId], references: [id])
+  agent           Agent?    @relation(fields: [agentId], references: [id])
+}
+```
 
-2. **JobLog**
-   ```prisma
-   model JobLog {
-     id              String    @id @default(cuid())
-     jobId           String
-     status          JobStatus
-     message         String?
-     requestPayload  Json?
-     responsePayload Json?
-     agentId         String?
-     createdAt       DateTime  @default(now())
-     job             Job       @relation(fields: [jobId], references: [id])
-     agent           Agent?    @relation(fields: [agentId], references: [id])
-   }
-   ```
+### API Layer
 
-### API Endpoints
-
-1. **Public Routes**
+1. **Public Endpoints**
 
    - `GET /api/jobs`: List user's jobs
    - `POST /api/jobs`: Create new job
    - `GET /api/jobs/[id]`: Get job details
    - `GET /api/jobs/[id]/logs`: Get job logs
 
-2. **Admin Routes**
+2. **Admin Endpoints**
    - `GET /api/admin/jobs`: List all jobs
    - `GET /api/admin/jobs/[id]`: Get job details
-   - `POST /api/admin/jobs/[id]/resubmit`: Force resubmit job
-   - `POST /api/admin/jobs/[id]/complete`: Force complete job
-   - `POST /api/admin/jobs/[id]/reassign`: Reassign job to agent
+   - `POST /api/admin/jobs/[id]/resubmit`: Force resubmit
+   - `POST /api/admin/jobs/[id]/complete`: Force complete
+   - `POST /api/admin/jobs/[id]/reassign`: Reassign agent
 
 ### Services
 
-1. **Job Service**
+```typescript
+// Job Service
+export const jobsApi = {
+  list: () => ApiResponse<JobListItem[]>,
+  getById: (id: string) => ApiResponse<Job>,
+  create: (data: CreateJobData) => ApiResponse<Job>,
+  getLogs: (id: string) => ApiResponse<JobLog[]>,
+};
 
-   - CRUD operations for jobs
-   - Job status management
-   - Log tracking and creation
-   - Agent assignment handling
-
-2. **React Query Hooks**
-   - `useJob`: Fetch and manage job data
-   - `useJobs`: List and paginate jobs
-   - `useJobLogs`: Fetch job logs
-   - `useReassignJob`: Handle job reassignment
-   - `useForceCompleteJob`: Force complete jobs
-   - `useForceResubmitJob`: Force resubmit jobs
+// React Query Hooks
+export const {
+  useJobs,
+  useJob,
+  useJobLogs,
+  useCreateJob,
+  useReassignJob,
+  useForceCompleteJob,
+  useForceResubmitJob,
+} = ...;
+```
 
 ## Current Status
 
 - ✅ Job CRUD operations
-- ✅ Job status tracking
-- ✅ Job logs implementation
-- ✅ Admin actions (resubmit, complete, reassign)
+- ✅ Status tracking and logs
+- ✅ Admin actions
 - ✅ Agent assignment
 - ✅ UI components
-- ⏳ Advanced filtering and sorting
+- ⏳ Advanced filtering
 - ❌ Batch operations
 - ❌ Job templates
 
@@ -108,67 +109,43 @@ The Jobs module provides a comprehensive system for managing AI tasks within the
 
 1. **Status Management**
 
-   - Implemented as an enum to ensure type safety
-   - Includes states: PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, FAILED, etc.
-   - Status transitions are logged for audit purposes
+   - Enum-based status tracking
+   - Comprehensive status transitions
+   - Audit logging for all changes
 
-2. **Logging System**
+2. **Job Assignment**
 
-   - Comprehensive logging of all job-related actions
-   - Structured log format with request/response payloads
-   - Timestamped entries for accurate tracking
+   - Dynamic agent selection
+   - Status-based reassignment rules
+   - Agent availability checking
 
-3. **API Design**
-   - RESTful endpoints following Next.js App Router conventions
-   - Consistent error handling and response format
-   - Type-safe responses using TypeScript
-
-## Dependencies
-
-- Next.js 14 (App Router)
-- Prisma (Database ORM)
-- TanStack Query (Data fetching)
-- Clerk (Authentication)
-- Shadcn UI (Components)
-- Zod (Schema validation)
-
-## Testing Strategy
-
-1. **Unit Tests**
-
-   - Component testing with React Testing Library
-   - Service layer unit tests
-   - API endpoint testing
-
-2. **Integration Tests**
-   - End-to-end flow testing
-   - API integration tests
-   - Database interaction tests
+3. **Admin Controls**
+   - Force complete/resubmit actions
+   - Job reassignment capability
+   - Detailed job metrics
 
 ## Known Issues
 
-1. No real-time updates for job status changes
-2. Limited sorting and filtering options
-3. Missing batch operations for admin actions
-4. No job templates or presets
+1. No real-time updates
+2. Limited filtering options
+3. Missing batch operations
+4. No job templates
 
 ## Future Improvements
 
-1. **Enhanced Features**
+1. **Features**
 
-   - Real-time updates using WebSocket
-   - Advanced filtering and sorting
-   - Batch operations for admin actions
+   - Real-time WebSocket updates
+   - Advanced search and filters
    - Job templates and presets
+   - Batch operations
 
-2. **Performance Optimizations**
+2. **Performance**
+   - Query optimization
+   - Pagination improvements
+   - Caching enhancements
 
-   - Implement caching for frequently accessed data
-   - Optimize database queries
-   - Add pagination for large datasets
+---
 
-3. **User Experience**
-   - Improved error messages
-   - Better loading states
-   - Enhanced mobile responsiveness
-   - Keyboard shortcuts for common actions
+Last Updated: 2025-02-13
+Version: 0.3.3
