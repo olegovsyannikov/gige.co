@@ -130,7 +130,7 @@ export async function POST(
         {
           model: "gpt-4-turbo-preview",
           temperature: 0.2,
-          max_tokens: 1000,
+          maxTokens: 1000,
         }
       );
 

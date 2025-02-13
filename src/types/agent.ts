@@ -43,6 +43,7 @@ export interface AgentListItem {
   id: string;
   name: string;
   description: string | null;
+  keywords: string;
   isActive: boolean;
   inputSchema: JsonSchema | null;
   _count?: {

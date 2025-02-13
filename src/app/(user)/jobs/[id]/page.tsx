@@ -147,13 +147,13 @@ export default function JobDetailPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            {job.status === "PENDING" ? (
+            {(job.status === "PENDING" || job.status === "RESUBMISSION_REQUIRED") ? (
               <Link href={`/jobs/${job.id}/edit`}>
                 <Button variant="outline">Edit Job</Button>
               </Link>
             ) : (
               <Button variant="outline" disabled>
-                Cannot edit - Job is in progress
+                Edit disabled
               </Button>
             )}
             <Link href="/jobs">

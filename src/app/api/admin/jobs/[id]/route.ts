@@ -139,7 +139,7 @@ export async function POST(
             status: "PENDING",
             logs: {
               create: {
-                status: "RESUBMITTED",
+                status: "PENDING",
                 message: "Job resubmitted by admin",
               },
             },
@@ -209,6 +209,25 @@ export async function POST(
 
       case "reassign":
         const { agentId } = body;
+        const agent = await prisma.agent.findUnique({
+          where: {
+            id: agentId,
+          },
+          select: {
+            name: true,
+          },
+        });
+        if (!agent) {
+          return NextResponse.json(
+            {
+              error: {
+                message: "Agent not found",
+                status: 404,
+              },
+            },
+            { status: 404 }
+          );
+        }
         updatedJob = await prisma.job.update({
           where: {
             id,
@@ -218,8 +237,8 @@ export async function POST(
             status: "ASSIGNED",
             logs: {
               create: {
-                status: "REASSIGNED",
-                message: `Job reassigned to agent ${agentId} by admin`,
+                status: "ASSIGNED",
+                message: `Job reassigned to agent ${agent.name} by admin`,
                 agentId,
               },
             },

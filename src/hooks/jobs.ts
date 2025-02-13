@@ -106,10 +106,17 @@ export function useAutoAssignJob() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: autoAssignJob,
-    onSuccess: (data) => {
+    mutationFn: (id: string) => autoAssignJob(id),
+    onSuccess: (data: Job) => {
+      if (!data?.id) {
+        console.error("Auto-assign response missing job ID:", data);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+    onError: (error: Error) => {
+      console.error("Auto-assign failed:", error);
     },
   });
 }
@@ -162,9 +169,16 @@ export function useCancelJobAssignment() {
 
   return useMutation({
     mutationFn: cancelJobAssignment,
-    onSuccess: (data) => {
+    onSuccess: (data: Job) => {
+      if (!data?.id) {
+        console.error("Cancel assignment response missing job ID:", data);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+    onError: (error: Error) => {
+      console.error("Cancel assignment failed:", error);
     },
   });
 }

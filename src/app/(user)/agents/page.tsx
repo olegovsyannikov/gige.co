@@ -31,47 +31,57 @@ export default async function AgentsPage() {
           </p>
         </div>
 
-        <div className="grid gap-6">
-          {agents.map((agent: AgentListItem) => (
-            <div
-              key={agent.id}
-              className="rounded-lg border bg-card text-card-foreground shadow-sm"
-            >
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      <Link
-                        href={`/agents/${agent.id}`}
-                        className="hover:underline"
-                      >
-                        {agent.name}
-                      </Link>
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {agent.description}
-                    </p>
+        {agents.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No agents available at the moment.
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {agents.map((agent: AgentListItem) => (
+              <div
+                key={agent.id}
+                className="rounded-lg border bg-card text-card-foreground shadow-sm"
+              >
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        <Link
+                          href={`/agents/${agent.id}`}
+                          className="hover:underline"
+                        >
+                          {agent.name}
+                        </Link>
+                      </h3>
+                      {agent.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {agent.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {agent._count?.jobs ?? 0} jobs completed
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {agent._count.jobs} jobs completed
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {agent.keywords.split(",").map((keyword: string) => (
-                    <Badge
-                      key={keyword}
-                      variant="secondary"
-                      className="text-xs"
-                    >
-                      {keyword.trim()}
-                    </Badge>
-                  ))}
+                  {agent.keywords && (
+                    <div className="flex flex-wrap gap-2">
+                      {agent.keywords.split(",").filter(Boolean).map((keyword: string) => (
+                        <Badge
+                          key={keyword}
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {keyword.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

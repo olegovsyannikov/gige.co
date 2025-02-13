@@ -106,30 +106,57 @@ export async function PUT(
         );
       }
 
-      // Only allow updates for pending jobs
-      if (job.status !== "PENDING") {
+      // Only allow updates for pending jobs or jobs that need resubmission
+      if (job.status !== "PENDING" && job.status !== "RESUBMISSION_REQUIRED") {
         return NextResponse.json(
-          { error: "Only pending jobs can be edited" },
+          {
+            error:
+              "Only pending jobs or jobs that need resubmission can be edited",
+          },
           { status: 400 }
         );
       }
 
       // Update job and create log
-      await prisma.$transaction([
+      const [updatedJob] = await prisma.$transaction([
         prisma.job.update({
           where: { id: jobId },
           data,
+          include: {
+            agent: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            _count: {
+              select: {
+                logs: true,
+              },
+            },
+          },
         }),
         prisma.jobLog.create({
           data: {
             jobId,
-            status: "PENDING",
+            status: job.status,
             message: "Job details updated by user",
           },
         }),
       ]);
 
-      return NextResponse.json({ success: true });
+      const response: ApiResponse<typeof updatedJob> = {
+        data: updatedJob,
+      };
+
+      return NextResponse.json(response);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return NextResponse.json(

@@ -1,17 +1,20 @@
 import { DeleteAgentButton } from "@/components/agents/delete-agent-button";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function AgentsPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function AdminAgentsPage() {
   const agents = await prisma.agent.findMany({
     orderBy: {
       createdAt: "desc",

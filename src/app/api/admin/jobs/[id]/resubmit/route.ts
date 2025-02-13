@@ -52,7 +52,7 @@ export async function POST(
         status: "PENDING",
         logs: {
           create: {
-            status: "RESUBMITTED",
+            status: "PENDING",
             message: "Job resubmitted by admin",
           },
         },

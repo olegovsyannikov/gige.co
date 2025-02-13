@@ -98,12 +98,32 @@ export async function POST(
     }
 
     // Update job with matched agent and create log in a transaction
-    await prisma.$transaction([
+    const [updatedJob] = await prisma.$transaction([
       prisma.job.update({
         where: { id: jobId },
         data: {
           assignedAgentId: result.agentId,
           status: "ASSIGNED",
+        },
+        include: {
+          agent: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              logs: true,
+            },
+          },
         },
       }),
       prisma.jobLog.create({
@@ -119,7 +139,7 @@ export async function POST(
       }),
     ]);
 
-    return NextResponse.json(result);
+    return NextResponse.json({ data: updatedJob });
   } catch (error: unknown) {
     console.error("Error in auto job assignment:", error);
     const message =

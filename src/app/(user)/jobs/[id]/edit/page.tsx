@@ -70,14 +70,14 @@ export default function EditJobPage() {
     );
   }
 
-  // Prevent editing of non-pending jobs
-  if (job.status !== "PENDING") {
+  // Prevent editing of jobs that are not in editable states
+  if (job.status !== "PENDING" && job.status !== "RESUBMISSION_REQUIRED") {
     return (
       <div className="container mx-auto p-6">
         <Alert variant="destructive">
           <AlertDescription>
-            This job cannot be edited because it is already {job.status.toLowerCase()}.
-            Only pending jobs can be edited.
+            This job cannot be edited because it is {job.status.toLowerCase()}.
+            Only pending jobs or jobs that need resubmission can be edited.
           </AlertDescription>
         </Alert>
       </div>

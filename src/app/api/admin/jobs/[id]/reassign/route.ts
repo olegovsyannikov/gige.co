@@ -86,7 +86,7 @@ export async function POST(
         status: "ASSIGNED",
         logs: {
           create: {
-            status: "REASSIGNED",
+            status: "ASSIGNED",
             message: `Job reassigned to agent ${agent.name} by admin`,
             agentId,
           },
