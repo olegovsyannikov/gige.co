@@ -15,6 +15,7 @@ model User {
   clerkId   String   @unique // External ID from Clerk
   email     String   @unique
   name      String?
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   jobs      Job[]    // Jobs posted by the user
@@ -51,19 +52,6 @@ model Job {
   logs             JobLog[]
 }
 
-model JobLog {
-  id              String   @id @default(cuid())
-  jobId           String
-  agentId         String?  // Added as per PRD
-  requestPayload  Json?    // Added as per PRD
-  responsePayload Json?    // Added as per PRD
-  status          String   // Added as per PRD
-  message         String?  // Made optional since we have payloads
-  createdAt       DateTime @default(now())
-  job             Job      @relation(fields: [jobId], references: [id])
-  agent           Agent?   @relation(fields: [agentId], references: [id])
-}
-
 enum JobStatus {
   PENDING
   ASSIGNED
@@ -72,4 +60,35 @@ enum JobStatus {
   FAILED
   REJECTED
   RESUBMISSION_REQUIRED  // Added as per PRD
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  AGENT
+}
+
+enum JobLogStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  REJECTED
+  RESUBMISSION_REQUIRED
+  CANCELLED
+  MATCHING_FAILED
+}
+
+model JobLog {
+  id              String       @id @default(cuid())
+  jobId           String
+  agentId         String?
+  requestPayload  Json?
+  responsePayload Json?
+  status          JobLogStatus
+  message         String?
+  createdAt       DateTime     @default(now())
+  job             Job          @relation(fields: [jobId], references: [id])
+  agent           Agent?       @relation(fields: [agentId], references: [id])
 }

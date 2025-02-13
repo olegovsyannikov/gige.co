@@ -1,14 +1,15 @@
 export interface JsonSchema {
   type: string;
+  description?: string;
   properties?: Record<string, JsonSchemaProperty>;
   required?: string[];
   additionalProperties?: boolean;
-  description?: string;
 }
 
 export interface JsonSchemaProperty {
   type: string;
   description?: string;
+  title?: string;
   format?: string;
   enum?: string[];
   items?: JsonSchemaProperty;
@@ -41,9 +42,10 @@ export interface Agent {
 export interface AgentListItem {
   id: string;
   name: string;
-  description: string;
-  keywords: string;
-  _count: {
+  description: string | null;
+  isActive: boolean;
+  inputSchema: JsonSchema | null;
+  _count?: {
     jobs: number;
   };
 }

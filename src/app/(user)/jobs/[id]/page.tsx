@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,43 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { JobActionButtons } from "@/components/ui/job-action-buttons";
+import { JobLogItem } from "@/components/ui/job-log-item";
+import { JobStatusBadge } from "@/components/ui/job-status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJob, useJobLogs } from "@/hooks/jobs";
-import { JobLog } from "@/types/job";
+import { JobStatus } from "@prisma/client";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-
-function JobLogItem({ log }: { log: JobLog }) {
-  return (
-    <div className="border-b py-4 last:border-0">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium">{log.status}</span>
-        <span className="text-sm text-muted-foreground">
-          {new Date(log.createdAt).toLocaleString()}
-        </span>
-      </div>
-      {log.message && (
-        <p className="text-sm text-muted-foreground">{log.message}</p>
-      )}
-      {log.requestPayload && (
-        <div className="mt-2">
-          <p className="text-sm font-medium mb-1">Request:</p>
-          <pre className="text-sm bg-muted p-2 rounded-md overflow-auto">
-            {JSON.stringify(log.requestPayload, null, 2)}
-          </pre>
-        </div>
-      )}
-      {log.responsePayload && (
-        <div className="mt-2">
-          <p className="text-sm font-medium mb-1">Response:</p>
-          <pre className="text-sm bg-muted p-2 rounded-md overflow-auto">
-            {JSON.stringify(log.responsePayload, null, 2)}
-          </pre>
-        </div>
-      )}
-    </div>
-  );
-}
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
 function JobDetailSkeleton() {
   return (
@@ -77,9 +50,57 @@ function JobDetailSkeleton() {
 }
 
 export default function JobDetailPage() {
+  const router = useRouter();
   const { id } = useParams() as { id: string };
   const { data: job, isLoading: isJobLoading, error: jobError } = useJob(id);
   const { data: logs, isLoading: isLogsLoading } = useJobLogs(id);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleAutoAssign() {
+    try {
+      setIsAssigning(true);
+      setError(null);
+      const response = await fetch(`/api/jobs/${id}/auto-assign`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to auto-assign job");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Error auto-assigning job:", error);
+      setError(error instanceof Error ? error.message : "Failed to auto-assign job");
+    } finally {
+      setIsAssigning(false);
+    }
+  }
+
+  function handleManualAssign() {
+    router.push(`/jobs/${id}/assign`);
+  }
+
+  async function handleCancelAssignment() {
+    try {
+      setError(null);
+      const response = await fetch(`/api/jobs/${id}/cancel`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to cancel assignment");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Error cancelling assignment:", error);
+      setError(error instanceof Error ? error.message : "Failed to cancel assignment");
+    }
+  }
 
   if (isJobLoading || isLogsLoading) {
     return (
@@ -99,80 +120,107 @@ export default function JobDetailPage() {
     );
   }
 
+  // Convert job to the correct type
+  const jobWithTypedStatus = {
+    ...job,
+    status: job.status as JobStatus,
+    createdAt: new Date(job.createdAt),
+    updatedAt: new Date(job.updatedAt),
+  };
+
+  // Convert logs to the correct type
+  const typedLogs = logs?.map(log => ({
+    ...log,
+    status: log.status as JobStatus,
+    createdAt: new Date(log.createdAt),
+  }));
+
   return (
     <div className="container mx-auto p-6">
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{job.name}</h1>
-            <p className="text-muted-foreground">
-              Created {new Date(job.createdAt).toLocaleDateString()}
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <JobStatusBadge status={job.status as JobStatus} />
+              <span className="text-sm text-muted-foreground">
+                Created {new Date(job.createdAt).toLocaleDateString()}
+              </span>
+            </div>
           </div>
           <Link href="/jobs">
             <Button variant="outline">Back to Jobs</Button>
           </Link>
         </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-medium mb-1">Description</h3>
-                <p className="text-muted-foreground">{job.description}</p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">Acceptance Criteria</h3>
-                <p className="text-muted-foreground">{job.acceptanceCriteria}</p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">Status</h3>
-                <p className="text-muted-foreground">{job.status}</p>
-              </div>
-              {job.agent && (
-                <div>
-                  <h3 className="font-medium mb-1">Assigned Agent</h3>
-                  <Link
-                    href={`/agents/${job.agent.id}`}
-                    className="text-muted-foreground hover:underline"
-                  >
-                    {job.agent.name}
-                  </Link>
-                </div>
-              )}
-              {job.result && (
-                <div>
-                  <h3 className="font-medium mb-1">Result</h3>
-                  <pre className="text-sm bg-muted p-2 rounded-md overflow-auto">
-                    {JSON.stringify(job.result, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Execution Log</CardTitle>
-              <CardDescription>
-                History of job processing and updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="divide-y">
-                {logs?.map((log) => (
-                  <JobLogItem key={log.id} log={log} />
-                ))}
-                {!logs?.length && (
-                  <p className="text-muted-foreground py-4">No logs available</p>
-                )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-1">Description</h3>
+              <p className="text-muted-foreground">{job.description}</p>
+            </div>
+            <div>
+              <h3 className="font-medium mb-1">Acceptance Criteria</h3>
+              <p className="text-muted-foreground">{job.acceptanceCriteria}</p>
+            </div>
+            {job.agent && (
+              <div>
+                <h3 className="font-medium mb-1">Assigned Agent</h3>
+                <Link
+                  href={`/agents/${job.agent.id}`}
+                  className="text-muted-foreground hover:underline"
+                >
+                  {job.agent.name}
+                </Link>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+            {job.result && (
+              <div>
+                <h3 className="font-medium mb-1">Result</h3>
+                <pre className="text-sm bg-muted p-2 rounded-md overflow-auto">
+                  {JSON.stringify(job.result, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            <div className="pt-4">
+              <JobActionButtons
+                job={jobWithTypedStatus}
+                onAutoAssign={!isAssigning ? handleAutoAssign : undefined}
+                onManualAssign={handleManualAssign}
+                onCancelAssignment={handleCancelAssignment}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Execution Log</CardTitle>
+            <CardDescription>
+              History of job processing and updates
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {typedLogs?.map((log) => (
+                <JobLogItem key={log.id} log={log} />
+              ))}
+              {!logs?.length && (
+                <p className="text-muted-foreground">No logs available</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

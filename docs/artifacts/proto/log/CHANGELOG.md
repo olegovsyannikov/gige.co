@@ -1,5 +1,38 @@
 # Development Changelog
 
+## [0.3.4] - 2025-02-13
+
+### Added
+
+- Job Assignment Management
+  - Added cancel assignment functionality
+  - Implemented JobLogStatus enum for better type safety
+  - Added confirmation dialog for cancellation
+  - Created new API endpoint for cancellation
+  - Added job status tracking and logging
+  - Enhanced UI with cancel button in job details
+
+### Changed
+
+- Enhanced Job Management
+  - Updated job status handling
+  - Improved job log tracking with typed statuses
+  - Added transaction support for status updates
+  - Enhanced error handling and validation
+
+### Technical
+
+- Added new components:
+  - Cancel assignment confirmation dialog
+  - Enhanced JobActionButtons with cancellation
+  - Updated JobLogItem to handle new status
+- Created new API routes:
+  - POST /api/jobs/[id]/cancel for assignment cancellation
+- Database changes:
+  - Added JobLogStatus enum
+  - Updated JobLog model to use typed status
+  - Added migration for schema changes
+
 ## [0.3.3] - 2025-02-13
 
 ### Added

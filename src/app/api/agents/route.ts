@@ -16,6 +16,9 @@ export async function GET() {
         name: true,
         description: true,
         keywords: true,
+        inputSchema: true,
+        outputSchema: true,
+        isActive: true,
         _count: {
           select: {
             jobs: true,
