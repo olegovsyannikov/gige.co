@@ -9,7 +9,7 @@ import {
   reassignJob,
   updateJob,
 } from "@/services/jobs";
-import { JsonSchema } from "@/types/common";
+import { JsonValue } from "@/types/common";
 import { Job, JobListItem, JobLog } from "@/types/job";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -113,7 +113,7 @@ export function useForceCompleteJob() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, result }: { id: string; result: JsonSchema }) =>
+    mutationFn: ({ id, result }: { id: string; result: JsonValue }) =>
       forceCompleteJob(id, result),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });

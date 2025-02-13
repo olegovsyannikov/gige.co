@@ -79,7 +79,7 @@ function JobDetailSkeleton() {
 export default function JobDetailPage() {
   const { id } = useParams() as { id: string };
   const { data: job, isLoading: isJobLoading, error: jobError } = useJob(id);
-  const { data: logs, isLoading: isLogsLoading, error: logsError } = useJobLogs(id);
+  const { data: logs, isLoading: isLogsLoading } = useJobLogs(id);
 
   if (isJobLoading || isLogsLoading) {
     return (

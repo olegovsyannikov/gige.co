@@ -3,6 +3,8 @@ import { ApiResponse } from "@/services/api";
 import { AgentListItem } from "@/types/agent";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 async function getAgents(): Promise<ApiResponse<AgentListItem[]>> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/agents`, {
     next: { revalidate: 60 }, // Cache for 1 minute

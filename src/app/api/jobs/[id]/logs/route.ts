@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json(

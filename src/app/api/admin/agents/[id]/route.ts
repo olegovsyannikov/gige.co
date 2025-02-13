@@ -3,15 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authError = await requireAdmin(req);
+    const authError = await requireAdmin(request);
     if (authError) return authError;
 
+    const { id } = await params;
+
     await prisma.agent.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return new NextResponse(null, { status: 204 });

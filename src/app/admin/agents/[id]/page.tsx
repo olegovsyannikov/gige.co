@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditAgentPage({ params }: Props) {
   // Await params before using them
-  const { id } = await Promise.resolve(params);
+  const { id } = await params;
 
   const agent = id === "new"
     ? null

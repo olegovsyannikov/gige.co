@@ -149,7 +149,7 @@ export default function AdminJobDetailPage() {
                 onClick={() =>
                   forceComplete({
                     id: job.id,
-                    result: { message: "Completed by admin" },
+                    result: { status: "completed", details: "Completed by admin" },
                   })
                 }
               >

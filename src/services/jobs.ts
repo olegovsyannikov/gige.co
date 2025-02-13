@@ -1,4 +1,4 @@
-import { JsonSchema } from "@/types/common";
+import { JsonValue } from "@/types/common";
 import { Job, JobListItem, JobLog } from "@/types/job";
 import { apiRequest } from "./api";
 
@@ -45,7 +45,7 @@ export async function forceResubmitJob(id: string): Promise<Job> {
 
 export async function forceCompleteJob(
   id: string,
-  result: JsonSchema
+  result: JsonValue
 ): Promise<Job> {
   return apiRequest(`/admin/jobs/${id}/complete`, {
     method: "POST",

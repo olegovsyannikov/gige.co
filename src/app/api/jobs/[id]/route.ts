@@ -4,12 +4,12 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  req: NextRequest,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json(
@@ -100,12 +100,12 @@ export async function GET(
 }
 
 export async function PUT(
-  req: NextRequest,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json(
@@ -136,7 +136,7 @@ export async function PUT(
       );
     }
 
-    const body = await req.json();
+    const body = await request.json();
 
     const job = await prisma.job.findUnique({
       where: {
