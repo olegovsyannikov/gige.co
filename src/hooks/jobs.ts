@@ -1,4 +1,6 @@
 import {
+  autoAssignJob,
+  cancelJobAssignment,
   createJob,
   forceCompleteJob,
   forceResubmitJob,
@@ -131,6 +133,30 @@ export function useReassignJob() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+}
+
+export function useAutoAssignJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => autoAssignJob(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.logs(id) });
+    },
+  });
+}
+
+export function useCancelJobAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => cancelJobAssignment(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.logs(id) });
     },
   });
 }

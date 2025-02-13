@@ -1,13 +1,13 @@
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Job } from "@prisma/client";
@@ -43,7 +43,14 @@ export function JobActionButtons({
             onClick={onAutoAssign}
             disabled={!onAutoAssign}
           >
-            Auto-Assign
+            {!onAutoAssign ? (
+              <>
+                <span className="mr-2">Assigning...</span>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              </>
+            ) : (
+              "Auto-Assign"
+            )}
           </Button>
           <Button
             variant="outline"
@@ -55,10 +62,19 @@ export function JobActionButtons({
         </>
       )}
 
-      {isAssigned && onCancelAssignment && (
+      {isAssigned && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive">Cancel Assignment</Button>
+            <Button variant="destructive" disabled={!onCancelAssignment}>
+              {!onCancelAssignment ? (
+                <>
+                  <span className="mr-2">Cancelling...</span>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                </>
+              ) : (
+                "Cancel Assignment"
+              )}
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -70,8 +86,18 @@ export function JobActionButtons({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>No, keep assignment</AlertDialogCancel>
-              <AlertDialogAction onClick={onCancelAssignment}>
-                Yes, cancel assignment
+              <AlertDialogAction
+                onClick={onCancelAssignment}
+                disabled={!onCancelAssignment}
+              >
+                {!onCancelAssignment ? (
+                  <>
+                    <span className="mr-2">Cancelling...</span>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  </>
+                ) : (
+                  "Yes, cancel assignment"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

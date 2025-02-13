@@ -59,3 +59,15 @@ export async function reassignJob(id: string, agentId: string): Promise<Job> {
     body: JSON.stringify({ agentId }),
   });
 }
+
+export async function autoAssignJob(id: string): Promise<Job> {
+  return apiRequest(`/jobs/${id}/auto-assign`, {
+    method: "POST",
+  });
+}
+
+export async function cancelJobAssignment(id: string): Promise<Job> {
+  return apiRequest(`/jobs/${id}/cancel`, {
+    method: "POST",
+  });
+}

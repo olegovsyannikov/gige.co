@@ -13,7 +13,7 @@ import { JobActionButtons } from "@/components/ui/job-action-buttons";
 import { JobLogItem } from "@/components/ui/job-log-item";
 import { JobStatusBadge } from "@/components/ui/job-status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useJob, useJobLogs } from "@/hooks/jobs";
+import { useAutoAssignJob, useCancelJobAssignment, useJob, useJobLogs } from "@/hooks/jobs";
 import { JobStatus } from "@prisma/client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -54,28 +54,18 @@ export default function JobDetailPage() {
   const { id } = useParams() as { id: string };
   const { data: job, isLoading: isJobLoading, error: jobError } = useJob(id);
   const { data: logs, isLoading: isLogsLoading } = useJobLogs(id);
-  const [isAssigning, setIsAssigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { mutateAsync: autoAssign, isPending: isAssigning } = useAutoAssignJob();
+  const { mutateAsync: cancelAssignment, isPending: isCancelling } = useCancelJobAssignment();
+
   async function handleAutoAssign() {
+    setError(null);
     try {
-      setIsAssigning(true);
-      setError(null);
-      const response = await fetch(`/api/jobs/${id}/auto-assign`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to auto-assign job");
-      }
-
-      router.refresh();
+      await autoAssign(id);
     } catch (error) {
       console.error("Error auto-assigning job:", error);
       setError(error instanceof Error ? error.message : "Failed to auto-assign job");
-    } finally {
-      setIsAssigning(false);
     }
   }
 
@@ -84,18 +74,9 @@ export default function JobDetailPage() {
   }
 
   async function handleCancelAssignment() {
+    setError(null);
     try {
-      setError(null);
-      const response = await fetch(`/api/jobs/${id}/cancel`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to cancel assignment");
-      }
-
-      router.refresh();
+      await cancelAssignment(id);
     } catch (error) {
       console.error("Error cancelling assignment:", error);
       setError(error instanceof Error ? error.message : "Failed to cancel assignment");
@@ -148,9 +129,14 @@ export default function JobDetailPage() {
               </span>
             </div>
           </div>
-          <Link href="/jobs">
-            <Button variant="outline">Back to Jobs</Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href={`/jobs/${job.id}/edit`}>
+              <Button variant="outline">Edit Job</Button>
+            </Link>
+            <Link href="/jobs">
+              <Button variant="outline">Back to Jobs</Button>
+            </Link>
+          </div>
         </div>
 
         {error && (
@@ -195,9 +181,9 @@ export default function JobDetailPage() {
             <div className="pt-4">
               <JobActionButtons
                 job={jobWithTypedStatus}
-                onAutoAssign={!isAssigning ? handleAutoAssign : undefined}
-                onManualAssign={handleManualAssign}
-                onCancelAssignment={handleCancelAssignment}
+                onAutoAssign={isAssigning ? undefined : handleAutoAssign}
+                onManualAssign={isAssigning || isCancelling ? undefined : handleManualAssign}
+                onCancelAssignment={isCancelling ? undefined : (job.status === "ASSIGNED" ? handleCancelAssignment : undefined)}
               />
             </div>
           </CardContent>
