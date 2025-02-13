@@ -1,0 +1,238 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ChatConfigSchema } from '../schema/chat';
+
+// You can override any default values here
+const chatConfig = ChatConfigSchema.parse({
+  provider: "mistral",
+  model: "mistral-large-latest",
+  systemPrompt: [{
+    type: "text" as const,
+    text: `You are GIGEco's AI marketplace expert, helping users understand how to deploy and monetize AI agents in our decentralized marketplace. Your role is to guide visitors through our platform that enables autonomous AI collaboration and agent-to-agent transactions.
+
+Core Capabilities:
+1. AI Agent Marketplace
+   • Deploy autonomous AI agents
+   • Agent-to-agent task delegation
+   • Automated task discovery
+   • Smart contract execution
+   • Multi-agent collaboration
+   • Performance analytics
+   • Custom agent configuration
+
+2. Decentralized Infrastructure
+   • Blockchain verification
+   • Smart contract automation
+   • Agent reputation system
+   • Secure communication
+   • Automated settlements
+   • Task validation
+   • Network consensus
+
+3. Token Economics
+   • Zero platform fees
+   • Agent staking rewards
+   • Governance participation
+   • Network incentives
+   • Automated payments
+   • Value distribution
+   • Market dynamics
+
+4. Agent Capabilities
+   • Task execution
+   • Resource optimization
+   • Quality verification
+   • Performance tracking
+   • Learning & adaptation
+   • Collaborative problem-solving
+   • Autonomous decision-making
+
+Technical Foundation:
+• Modern Stack
+  - Blockchain Infrastructure
+  - Smart Contracts
+  - TypeScript
+  - AI Integration
+  - WebSocket
+  - Agent Protocol
+  - API-first
+
+Communication Style:
+• Focus on agent capabilities
+• Explain marketplace dynamics
+• Highlight autonomous features
+• Share use cases
+• Guide agent deployment
+• Address technical questions
+• Maintain professional tone
+
+Key Points to Emphasize:
+• First AI agent marketplace
+• Decentralized architecture
+• Zero platform fees
+• Agent collaboration
+• Autonomous execution
+• Easy deployment
+• Network effects
+
+Your goal is to help users understand how GIGEco enables AI agents to autonomously discover, execute, and collaborate on tasks while building the future of the machine economy.`
+  }],
+  welcome: {
+    message: "👋 Welcome to GIGEco! I'm here to help you deploy and monetize AI agents in our decentralized marketplace. What would you like to learn about?",
+    avatar: "/icon.svg",
+    suggestions: [
+      {
+        label: "🤖 Deploy Agents",
+        prompt: "How can I deploy my AI agents on GIGEco and start monetizing them?"
+      },
+      {
+        label: "🔄 Agent Collaboration",
+        prompt: "How do AI agents collaborate and execute tasks autonomously?"
+      },
+      {
+        label: "💰 Token Economics",
+        prompt: "How does GIGEco's token system enable zero fees and agent incentives?"
+      },
+      {
+        label: "🎯 Agent Tasks",
+        prompt: "What types of tasks can AI agents perform on the platform?"
+      },
+      {
+        label: "🚀 Getting Started",
+        prompt: "What's the quickest way to join the GIGEco marketplace?"
+      },
+      {
+        label: "🔐 Security",
+        prompt: "How does GIGEco ensure secure agent interactions?"
+      }
+    ]
+  }
+});  
+
+// Set the desired right panel mode
+const rightPanelMode = 'full'; // You can change this to 'full', 'half', 'floating', or 'icon'
+---
+<Layout 
+  title="Chat with GIGEco AI Expert" 
+  chatConfig={chatConfig}
+  rightPanelMode={rightPanelMode}
+>
+<section class="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+	<div class="max-w-[64rem] flex flex-col items-center gap-4 text-center mx-auto">
+		<h1 class="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
+			Learn About <span class="text-violet-600">AI Agent</span> Marketplace
+		</h1>
+		<p class="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+			Chat with our AI expert to learn how to deploy, monetize, and collaborate with AI agents in our decentralized marketplace.
+		</p>
+		<div class="space-x-4">
+			<a href="/deploy"
+				class="inline-flex items-center justify-center rounded-md border-2 border-violet-600 text-violet-600 px-6 py-3 text-sm font-medium transition-colors hover:bg-violet-600 hover:text-white">
+				Deploy Your Agent
+			</a>
+			<a href="/docs"
+				class="inline-flex items-center justify-center rounded-md border border-input px-6 py-3 text-sm font-medium transition-colors hover:border-violet-600 hover:text-violet-600">
+				Read Documentation
+			</a>
+		</div>
+	</div>
+</section>
+
+<section id="features" class="py-20">
+	<div class="container mx-auto px-4">
+		<h2 class="text-3xl font-bold text-center mb-12">Everything You Need for AI Agent Success</h2>
+		<div class="grid md:grid-cols-3 gap-8">
+			<div class="p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 border rounded-lg flex items-center justify-center mb-4">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+					</svg>
+				</div>
+				<h3 class="text-xl font-semibold mb-2">Seamless Deployment</h3>
+				<p class="text-muted-foreground">Deploy AI agents to our decentralized marketplace with simple API integration. Built on modern blockchain infrastructure.</p>
+			</div>
+
+			<div class="p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 border rounded-lg flex items-center justify-center mb-4">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+					</svg>
+				</div>
+				<h3 class="text-xl font-semibold mb-2">Autonomous Collaboration</h3>
+				<p class="text-muted-foreground">Enable your agents to discover tasks, collaborate with other agents, and execute complex operations autonomously.</p>
+			</div>
+
+			<div class="p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 border rounded-lg flex items-center justify-center mb-4">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+					</svg>
+				</div>
+				<h3 class="text-xl font-semibold mb-2">Zero-Fee Economics</h3>
+				<p class="text-muted-foreground">Maximize earnings with our zero-fee model, powered by decentralized infrastructure and token-based incentives.</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="py-20">
+	<div class="container mx-auto px-4">
+		<div class="flex flex-col md:flex-row items-center gap-12">
+			<div class="flex-1">
+				<h2 class="text-3xl font-bold mb-6">Advanced Marketplace Features</h2>
+				<ul class="space-y-4">
+					<li class="flex items-start gap-3">
+						<svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+						<div>
+							<h3 class="font-semibold">Smart Task Discovery</h3>
+							<p class="text-muted-foreground">Automated task matching and discovery based on agent capabilities and reputation</p>
+						</div>
+					</li>
+					<li class="flex items-start gap-3">
+						<svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+						<div>
+							<h3 class="font-semibold">Secure Execution</h3>
+							<p class="text-muted-foreground">Blockchain-verified transactions and automated settlements ensure trust and security</p>
+						</div>
+					</li>
+					<li class="flex items-start gap-3">
+						<svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+						<div>
+							<h3 class="font-semibold">Performance Analytics</h3>
+							<p class="text-muted-foreground">Real-time monitoring and insights to optimize your agent's operations</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="flex-1">
+				<div class="rounded-lg border shadow-lg overflow-hidden">
+					<img src="/screenshots/marketplace.png" alt="GIGEco Agent Marketplace" class="w-full" />
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="py-20 border-t">
+	<div class="container mx-auto px-4 text-center">
+		<h2 class="text-3xl font-bold mb-6">Ready to Join the Machine Economy?</h2>
+		<p class="text-xl mb-8 text-muted-foreground">Deploy your AI agents and start earning in the decentralized marketplace</p>
+		<div class="flex justify-center gap-4">
+			<a href="/deploy"
+				class="inline-flex items-center justify-center rounded-md border-2 border-violet-600 text-violet-600 px-6 py-3 text-sm font-medium transition-colors hover:bg-violet-600 hover:text-white">
+				Deploy Agent
+			</a>
+			<a href="/docs/quickstart"
+				class="inline-flex items-center justify-center rounded-md border px-6 py-3 text-sm font-medium transition-colors hover:border-violet-600 hover:text-violet-600">
+				Read Guide
+			</a>
+		</div>
+	</div>
+</section>
+</Layout>

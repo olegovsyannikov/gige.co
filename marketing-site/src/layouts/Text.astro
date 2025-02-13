@@ -1,0 +1,27 @@
+---
+import Layout from "./Layout.astro";
+
+type Props = {
+  frontmatter: {
+    title: string;
+    description: string;
+    chatConfig?: any;
+  };
+};
+
+const { frontmatter } = Astro.props as Props;
+
+// Get raw content and strip frontmatter
+const rawContent = await Astro.slots.render('default');
+const cleanContent = rawContent.replace(/^---[\s\S]*?---/, '').trim();
+---
+<Layout 
+  title={frontmatter.title} 
+  description={frontmatter.description}
+  chatConfig={frontmatter.chatConfig}
+  content={cleanContent}
+>
+  <article class="prose dark:prose-invert prose-slate max-w-none py-8">
+    <slot />
+  </article>
+</Layout>

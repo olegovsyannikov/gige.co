@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import type { CollectionEntry } from 'astro:content';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from 'lucide-react';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const prompts = await getCollection('prompts');
+  return prompts.map((entry: CollectionEntry<'prompts'>) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+type Props = {
+  entry: CollectionEntry<'prompts'>;
+};
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+---
+
+<Layout
+  title={`${entry.data.title} - Prompts`}
+  description={entry.data.description}
+>
+  <div >
+    <article>
+      <header class="mb-8">
+        <div class="flex flex-wrap items-center gap-3 mb-4 text-sm">
+          <span class="text-sm flex items-center text-muted-foreground/90">
+            <Calendar className="w-4 h-4 mr-1.5 text-primary/60" />
+            {formatDate(entry.data.date)}
+          </span>
+          <div class="flex flex-wrap gap-2">
+            {entry.data.tags.map((tag: string) => (
+              <Badge variant="secondary">{tag}</Badge>
+            ))}
+          </div>
+        </div>
+        <h1 class="text-4xl font-bold mb-4">{entry.data.title}</h1>
+        <p class="text-xl text-muted-foreground">{entry.data.description}</p>
+      </header>
+      <div class="prose prose-slate dark:prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </div>
+</Layout>

@@ -1,0 +1,218 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import { Card } from "@/components/ui/card";
+import { Calendar, Grid2X2, LayoutList, LayoutGrid, SquareStack, Clock } from "lucide-react";
+import type { CollectionEntry } from "astro:content";
+
+// Get all Blog entries sorted by date
+const entries = (await getCollection("blog"))
+  .sort((a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) => 
+    new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+  );
+
+// Get view mode from URL params, default to list
+const viewMode = Astro.url.searchParams.get("view") || "list";
+const gridColumns = Astro.url.searchParams.get("columns") || "2";
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+function estimateReadingTime(text: string): number {
+  const wordsPerMinute = 200;
+  const words = text.trim().split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
+}
+---
+
+<Layout
+  title="Blog - Latest Articles and Updates"
+  description="Explore our latest articles, tutorials, and insights"
+>
+  <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Hero Section -->
+    <div class="py-12 md:py-20 text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60 mb-4 tracking-tight">
+        Our Blog
+      </h1>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+        Discover our latest articles, insights, and updates
+      </p>
+    </div>
+
+    <!-- View Mode Switcher -->
+    <div class="flex justify-end mb-8">
+      <div class="inline-flex items-center p-1.5 rounded-full bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/30 border shadow-sm">
+        <a
+          href="/blog?view=list"
+          class={`p-2.5 rounded-full transition-all duration-200 ${
+            viewMode === "list"
+              ? "bg-background shadow-sm text-primary"
+              : "hover:bg-background/50 text-muted-foreground"
+          }`}
+          title="Magazine view"
+        >
+          <LayoutList className="w-5 h-5" />
+        </a>
+        <a
+          href="/blog?view=grid&columns=2"
+          class={`p-2.5 rounded-full transition-all duration-200 ${
+            viewMode === "grid" && gridColumns === "2"
+              ? "bg-background shadow-sm text-primary"
+              : "hover:bg-background/50 text-muted-foreground"
+          }`}
+          title="Classic grid"
+        >
+          <Grid2X2 className="w-5 h-5" />
+        </a>
+        <a
+          href="/blog?view=grid&columns=3"
+          class={`p-2.5 rounded-full transition-all duration-200 ${
+            viewMode === "grid" && gridColumns === "3"
+              ? "bg-background shadow-sm text-primary"
+              : "hover:bg-background/50 text-muted-foreground"
+          }`}
+          title="Pinterest style"
+        >
+          <LayoutGrid className="w-5 h-5" />
+        </a>
+        <a
+          href="/blog?view=grid&columns=4"
+          class={`p-2.5 rounded-full transition-all duration-200 ${
+            viewMode === "grid" && gridColumns === "4"
+              ? "bg-background shadow-sm text-primary"
+              : "hover:bg-background/50 text-muted-foreground"
+          }`}
+          title="Gallery view"
+        >
+          <SquareStack className="w-5 h-5" />
+        </a>
+      </div>
+    </div>
+
+    <!-- Blog Posts Grid -->
+    <div
+      class={`${
+        viewMode === "grid"
+          ? `grid gap-6 md:gap-8 grid-cols-1 ${
+              gridColumns === "2"
+                ? "sm:grid-cols-2"
+                : gridColumns === "3"
+                ? "sm:grid-cols-2 lg:grid-cols-3"
+                : "sm:grid-cols-2 lg:grid-cols-4"
+            }`
+          : "space-y-12 md:space-y-16"
+      }`}
+      transition:animate="slide"
+    >
+      {entries.map((entry: CollectionEntry<"Blog">, index: number) => (
+        <Card 
+          className={`group overflow-hidden border-muted/50 transition-all duration-300 hover:shadow-lg ${
+            viewMode === "list" 
+              ? index === 0 
+                ? "-mx-4 sm:-mx-6 lg:-mx-8" 
+                : "flex flex-col md:flex-row hover:bg-muted/5"
+              : "hover:-translate-y-1"
+          }`}
+        >
+          <a
+            href={`/blog/${entry.slug}`}
+            class={`block relative ${viewMode === "list" && index !== 0 ? "flex flex-1" : ""}`}
+          >
+            {entry.data.picture && (viewMode === "list" ? (
+              <div class={`${
+                index === 0 
+                  ? "relative aspect-[21/9] w-full" 
+                  : "w-full md:w-[280px] lg:w-[320px] shrink-0"
+              } overflow-hidden ${index === 0 ? '' : 'rounded-t-lg md:rounded-l-lg md:rounded-tr-none'}`}>
+                <img
+                  src={entry.data.picture}
+                  alt={entry.data.title}
+                  class={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+                    index !== 0 ? "aspect-[4/3]" : ""
+                  }`}
+                />
+                {index === 0 && (
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                )}
+              </div>
+            ) : (
+              viewMode === "grid" && (
+                <div class={`aspect-${gridColumns === "4" ? "square" : "video"} w-full overflow-hidden rounded-t-lg`}>
+                  <img
+                    src={entry.data.picture}
+                    alt={entry.data.title}
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )
+            ))}
+
+            {/* Content Section */}
+            {index === 0 && viewMode === "list" ? (
+              <div class="absolute bottom-0 left-0 right-0">
+                <div class="container max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12 lg:py-16">
+                  <div class="max-w-3xl text-white">
+                    <div class="flex flex-wrap items-center gap-3 mb-4 text-sm">
+                      <div class="inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-semibold bg-white/20 text-white border-transparent backdrop-blur-sm">
+                        {entry.data.type || "Blog"}
+                      </div>
+                      <span class="text-sm flex items-center text-white/90">
+                        <Calendar className="w-4 h-4 mr-1.5 text-white/70" client:load />
+                        {formatDate(new Date(entry.data.date))}
+                      </span>
+                      <span class="text-sm flex items-center text-white/90">
+                        <Clock className="w-4 h-4 mr-1.5 text-white/70" client:load />
+                        {estimateReadingTime(entry.data.description)} min read
+                      </span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 !leading-tight">
+                      {entry.data.title}
+                    </h2>
+                    <p class="text-lg text-white/90 line-clamp-3 mb-6 max-w-3xl">
+                      {entry.data.description}
+                    </p>
+                    <div class="inline-flex items-center text-white font-medium hover:text-primary transition-colors">
+                      Read Full Article
+                      <svg class="w-5 h-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div class="p-6 md:p-8 flex-1">
+                <div class="flex flex-wrap items-center gap-3 mb-4 text-sm">
+                  <div class="inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-semibold bg-primary/10 text-primary border-transparent">
+                    {entry.data.type || "Blog"}
+                  </div>
+                  <span class="text-sm flex items-center text-muted-foreground/90">
+                    <Calendar className="w-4 h-4 mr-1.5 text-primary/60" client:load />
+                    {formatDate(new Date(entry.data.date))}
+                  </span>
+                  <span class="text-sm flex items-center text-muted-foreground/90">
+                    <Clock className="w-4 h-4 mr-1.5 text-primary/60" client:load />
+                    {estimateReadingTime(entry.data.description)} min read
+                  </span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  {entry.data.title}
+                </h2>
+                <p class="text-muted-foreground line-clamp-2">
+                  {entry.data.description}
+                </p>
+              </div>
+            )}
+          </a>
+        </Card>
+      ))}
+    </div>
+  </div>
+</Layout>

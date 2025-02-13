@@ -1,0 +1,55 @@
+# Blocks
+blocks/
+
+# build output
+dist/
+# generated types
+.astro/
+.netlify/
+.vercel/
+.wrangler/
+
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+.env.local
+.env*.local
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# Local environment files
+*.local
+
+# Sensitive data
+.env.*
+!.env.example
+.obsidian/plugins/smart-composer/data.json
+
+# First ignore all .obsidian folders completely
+**/.obsidian/
+
+# Then explicitly allow plugins in the three specific vault locations
+!/.obsidian/plugins/
+!/src/.obsidian/plugins/
+!/src/content/.obsidian/plugins/
+
+# Ignore plugin data/caches in all allowed plugin folders
+**/.obsidian/plugins/*/data.json
+
+# Ignore chat histories in any directory
+**/.smtcmp_chat_histories
+src/content/.obsidian/plugins/smart-composer/data.json

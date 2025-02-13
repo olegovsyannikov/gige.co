@@ -1,0 +1,173 @@
+---
+import "../styles/global.css";
+import ThemeInit from "@/components/Theme.astro";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Right from "../components/Right";
+
+import { ChatConfigSchema } from "../schema/chat";
+
+interface Props {
+  title: string;
+  description?: string;
+  children: any;
+  header?: boolean;
+  footer?: boolean;
+  initialPanelMode?: "Quarter" | "Half" | "Full";
+  chatConfig?: any;
+}
+
+const {
+  title,
+  description = "ONE",
+  initialPanelMode = "Quarter",
+} = Astro.props;
+
+const { header = true, footer = true } = Astro.props;
+
+const chatConfig = ChatConfigSchema.parse({
+  systemPrompt: [{ type: "text", text: "Say XXX as every reply" }],
+  welcome: {
+    message: "How can I help you today?",
+    avatar: "/icon.svg",
+    suggestions: [
+      { label: "Tell me about ONE", prompt: "What is ONE?" },
+      { label: "Get Started", prompt: "How do I get started?" },
+    ],
+  },
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <ThemeInit />
+    <style>
+      :root {
+        --header-height: 60px;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-height: 100vh;
+        position: relative;
+        z-index: 10;
+        transition: grid-template-columns 0.3s ease;
+      }
+
+      .main-grid[data-panel-mode="Quarter"] {
+        grid-template-columns: 3fr 1fr;
+      }
+
+      .main-grid[data-panel-mode="Half"] {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .main-grid[data-panel-mode="Full"] {
+        grid-template-columns: 0fr 1fr;
+      }
+
+      .center-grid {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        margin-right: 0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+
+      /* Add styles for the right panel positioning */
+      :global(.right-panel) {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        background-color: var(--background);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+      }
+
+      :global(.right-panel[data-mode="Icon"]) {
+        width: 48px;
+        height: 48px;
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        border: none;
+        border-radius: 9999px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+      }
+
+      :global(.right-panel[data-mode="Icon"]:hover) {
+        transform: scale(1.05);
+      }
+
+      :global(.right-panel[data-mode="Quarter"]) {
+        width: 25%;
+      }
+
+      :global(.right-panel[data-mode="Half"]) {
+        width: 50%;
+      }
+
+      :global(.right-panel[data-mode="Full"]) {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      :global(.right-panel[data-mode="Full"] > div) {
+        max-width: 850px;
+        width: 100%;
+      }
+
+      /* Add smooth scrolling to the whole page */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Improve the scrollbar appearance */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+    </style>
+  </head><body>
+    <div class="main-grid" id="main-grid" data-panel-mode={initialPanelMode}>
+      <div class="center-grid" id="center-grid">
+        {header && <Header client:load />}
+
+        <main class="p-4">
+          <slot />
+        </main>
+
+        {footer && <Footer client:load />}
+      </div>
+    </div>
+    <Right
+      client:only="react"
+      chatConfig={chatConfig}
+    />
+  </body>
+</html>

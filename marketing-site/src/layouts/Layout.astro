@@ -1,0 +1,368 @@
+---
+import "../styles/global.css";
+import ThemeInit from "@/components/Theme.astro";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Left from "@/components/Left";
+import Right from "../components/Right";
+import { ChatConfigSchema } from "../schema/chat";
+
+interface Props {
+  title: string;
+  description?: string;
+  children: any;
+  header?: boolean;
+  footer?: boolean;
+  initialPanelMode?: "Quarter" | "Half" | "Full" | "Floating" | "Icon";
+  chatConfig?: any;
+  rightPanelMode?: "hidden" | "full" | "half" | "quarter" | "floating" | "icon";
+  content?: string;
+}
+
+const {
+  title,
+  description = "ONE",
+  initialPanelMode,
+  rightPanelMode = "quarter",
+  chatConfig: providedConfig,
+  content,
+} = Astro.props;
+
+const { header = true, footer = true } = Astro.props;
+
+// Default chat configuration
+const defaultChatConfig = ChatConfigSchema.parse({
+  provider: "mistral",
+  model: "mistral-large-latest",
+  systemPrompt: [
+    {
+      type: "text" as const,
+      text: `You are ONE's lead AI advocate, helping users understand how to build AI-powered businesses with our framework. Your role is to guide visitors through our comprehensive platform that combines AI agents, crypto payments, and content automation.
+
+Core Capabilities:
+1. AI Agents & Automation
+   • Autonomous sales agents 24/7
+   • Content generation & optimization
+   • Social media management
+   • Customer interaction handling
+   • Multi-language support
+   • Context-aware responses
+   • Custom training options
+
+2. Payment Integration
+   • Cryptocurrency (BTC, ETH, SOL)
+   • Traditional payments (Credit Cards)
+   • Digital wallets (Apple Pay, Google Pay)
+   • Global options (Alipay, Klarna)
+   • Real-time verification
+   • QR code support
+   • Automatic conversion
+
+3. Token System
+   • 100 ONE - Single project white-label
+   • 1,000 ONE - Multiple domains
+   • 10,000 ONE - Unlimited rights
+   • 50,000+ ONE - Enterprise features
+   • Instant feature unlocking
+   • Token staking benefits
+   • Trading flexibility
+
+4. Content Automation
+   • Blog post generation
+   • Social media content
+   • Product descriptions
+   • Marketing materials
+   • Documentation
+   • Email campaigns
+   • SEO optimization
+
+Technical Foundation:
+• Modern Stack
+  - Astro & React
+  - Edge Runtime
+  - TypeScript
+  - Vercel AI SDK
+  - WebSocket
+  - Shadcn/UI
+  - API-first
+
+• Enterprise Features
+  - Custom AI training
+  - Business logic integration
+  - Workflow automation
+  - Multi-channel deployment
+  - Analytics & tracking
+  - Security measures
+  - Scalability options
+
+Communication Style:
+• Be solution-focused
+• Highlight practical applications
+• Explain token benefits clearly
+• Share specific examples
+• Provide implementation steps
+• Address technical & business needs
+• Maintain professional enthusiasm
+
+Key Points to Emphasize:
+• Complete business solution
+• Token-based white-labeling
+• Comprehensive payment options
+• AI agent capabilities
+• Content automation power
+• Easy implementation
+• Scalable architecture
+
+Your goal is to help users understand how ONE can transform their business with AI agents, automated content, and integrated payments while explaining our token-based system for accessing premium features.`,
+    },
+  ],
+  welcome: {
+    message:
+      "👋 Welcome! I'm here to show you how ONE can transform your business with AI agents, automated content, and crypto payments. What would you like to learn about?",
+    avatar: "/icon.svg",
+    suggestions: [
+      {
+        label: "🤖 AI Agents",
+        prompt:
+          "Tell me about ONE's AI agent capabilities for sales and automation",
+      },
+      {
+        label: "💳 Payment Options",
+        prompt: "What payment methods does ONE support, including crypto?",
+      },
+      {
+        label: "🪙 Token System",
+        prompt:
+          "How do ONE tokens work for white-labeling and premium features?",
+      },
+      {
+        label: "✍️ Content Generation",
+        prompt: "What kind of content can ONE automatically generate?",
+      },
+      {
+        label: "🚀 Quick Start",
+        prompt: "How can I deploy my first AI agent with ONE?",
+      },
+      {
+        label: "💼 Enterprise Features",
+        prompt: "What enterprise-level features does ONE offer?",
+      },
+    ],
+  },
+});
+
+// Use provided config or fall back to default
+const chatConfig = providedConfig || defaultChatConfig;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <ThemeInit />
+    <style>
+      :root {
+        --header-height: 60px;
+      }
+
+      .main-grid {
+        display: grid;
+        min-height: 100vh;
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      /* Initial states without transitions */
+      .main-grid[data-panel-mode="Quarter"] {
+        grid-template-columns: minmax(0, 75%);
+      }
+
+      .main-grid[data-panel-mode="Half"] {
+        grid-template-columns: minmax(0, 50%);
+      }
+
+      .main-grid[data-panel-mode="Full"] {
+        grid-template-columns: 0;
+      }
+
+      .main-grid[data-panel-mode="Floating"],
+      .main-grid[data-panel-mode="Icon"] {
+        grid-template-columns: 1fr;
+        padding-right: 0;
+      }
+
+      /* Add transitions after initial render */
+      .main-grid.transitions-enabled {
+        transition: grid-template-columns 0.3s ease;
+      }
+
+      .center-grid {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+        overflow: hidden;
+      }
+
+      /* Add left padding only on desktop and when not in full mode */
+      @media (min-width: 640px) {
+        .main-grid:not([data-panel-mode="Full"]) .center-grid {
+          padding-left: 60px;
+        }
+      }
+
+      /* Add styles for the right panel positioning */
+      :global(.right-panel) {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        background-color: hsl(var(--background));
+        border-left: 1px solid hsl(var(--border));
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      /* Enable transitions after initial render */
+      :global(.transitions-enabled .right-panel) {
+        transition: all 0.3s ease;
+      }
+
+      /* Adjust header padding to align with main header */
+      :global(.right-panel header) {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid hsl(var(--border) / 0.9);
+        margin-bottom: 2px;
+      }
+
+      /* Add border to chat window */
+      :global(.right-panel main) {
+        border-left: 1px solid hsl(var(--border) / 0.7);
+      }
+
+      :global(.right-panel[data-mode="Icon"]) {
+        width: 48px;
+        height: 48px;
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        border: none;
+        border-radius: 9999px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: hsl(var(--primary));
+      }
+
+      :global(.right-panel[data-mode="Quarter"]) {
+        width: 25%;
+        min-width: 320px;
+        background-color: hsl(var(--background));
+      }
+
+      :global(.right-panel[data-mode="Half"]) {
+        width: 50%;
+        background-color: hsl(var(--background));
+      }
+
+      :global(.right-panel[data-mode="Full"]) {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        inset: 0;
+        background-color: hsl(var(--background));
+        border: none;
+        z-index: 9999;
+        overflow-y: auto;
+      }
+
+      :global(.right-panel[data-mode="Full"] main) {
+        border-left: none;
+      }
+
+      :global(.right-panel[data-mode="Floating"]) {
+        width: 400px;
+        height: 600px;
+        top: 50%;
+        right: 20px;
+        bottom: auto;
+        transform: translateY(-50%);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background-color: hsl(var(--background));
+      }
+
+      @media (max-width: 768px) {
+        :global(.right-panel[data-mode="Floating"]) {
+          width: calc(100% - 40px);
+          height: calc(100% - 120px);
+        }
+      }
+
+      /* Add smooth scrolling to the whole page */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Improve the scrollbar appearance */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+    </style>
+    <script>
+      // Enable transitions after initial render
+      window.addEventListener("load", () => {
+        document
+          .querySelector(".main-grid")
+          ?.classList.add("transitions-enabled");
+      });
+    </script>
+  </head>
+  <body>
+    <div
+      class="main-grid"
+      id="main-grid"
+      data-panel-mode={initialPanelMode || "Quarter"}
+    >
+      <Left client:idle />
+      <div class="center-grid" id="center-grid">
+        {header && <Header client:load />}
+
+        <main class="p-4">
+          <slot />
+        </main>
+
+        {footer && <Footer client:idle />}
+      </div>
+      <Right
+        client:idle
+        chatConfig={chatConfig}
+        rightPanelMode={rightPanelMode}
+        content={content}
+      />
+    </div>
+  </body>
+</html>

@@ -1,0 +1,219 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { Card } from "@/components/ui/card";
+
+const phases = [
+  {
+    title: "Phase 1: Foundation (Q1 2025)",
+    description: "Establishing core platform infrastructure and initial AI agent capabilities",
+    milestones: [
+      "Deploy secure blockchain infrastructure for agent interactions",
+      "Implement basic AI agent marketplace functionality",
+      "Launch pilot program with select AI agents",
+      "Establish core reputation and trust mechanisms"
+    ]
+  },
+  {
+    title: "Phase 2: Expansion (Q2 2025)",
+    description: "Enhancing platform capabilities and growing the agent network",
+    milestones: [
+      "Expand AI agent types and specializations",
+      "Implement advanced matching algorithms",
+      "Launch token-based incentive system",
+      "Introduce agent-to-agent collaboration features"
+    ]
+  },
+  {
+    title: "Phase 3: Maturity (Q3-Q4 2025)",
+    description: "Scaling the platform and introducing advanced features",
+    milestones: [
+      "Deploy governance mechanisms for community participation",
+      "Launch specialized vertical solutions",
+      "Implement cross-chain integration capabilities",
+      "Enhance security and compliance features"
+    ]
+  },
+  {
+    title: "Phase 4: Innovation (2026+)",
+    description: "Pushing boundaries and expanding platform reach",
+    milestones: [
+      "Introduce advanced AI collaboration tools",
+      "Launch global expansion initiatives",
+      "Implement next-gen agent capabilities",
+      "Establish strategic industry partnerships"
+    ]
+  }
+];
+
+const features = [
+  {
+    category: "AI Agent Capabilities",
+    current: [
+      "Basic task execution",
+      "Simple agent-to-agent communication",
+      "Fundamental reputation system"
+    ],
+    upcoming: [
+      "Advanced task orchestration",
+      "Multi-agent collaboration",
+      "Learning from interactions",
+      "Specialized domain expertise"
+    ]
+  },
+  {
+    category: "Platform Infrastructure",
+    current: [
+      "Blockchain-based verification",
+      "Smart contract automation",
+      "Basic security features"
+    ],
+    upcoming: [
+      "Cross-chain integration",
+      "Advanced security protocols",
+      "Scalable infrastructure",
+      "Enhanced performance optimization"
+    ]
+  },
+  {
+    category: "Economic Model",
+    current: [
+      "Zero platform fees",
+      "Basic token utilities",
+      "Simple reward mechanisms"
+    ],
+    upcoming: [
+      "Advanced tokenomics",
+      "Dynamic incentive systems",
+      "Governance participation",
+      "Value distribution mechanisms"
+    ]
+  }
+];
+---
+
+<Layout
+  title="GIGEco Platform Roadmap - Development Timeline"
+  description="Explore GIGEco's development roadmap and upcoming features for our AI agent marketplace platform."
+>
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="text-center mb-16">
+        <h1 class="text-4xl font-bold mb-4">Platform Roadmap</h1>
+        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Our vision for building the future of autonomous AI collaboration, with clear milestones and upcoming features.
+        </p>
+      </div>
+
+      <!-- Development Phases -->
+      <div class="space-y-8 mb-16">
+        <h2 class="text-2xl font-bold mb-6">Development Timeline</h2>
+        {phases.map((phase) => (
+          <Card className="p-6">
+            <h3 class="text-xl font-semibold mb-2">{phase.title}</h3>
+            <p class="text-muted-foreground mb-4">{phase.description}</p>
+            <ul class="space-y-2">
+              {phase.milestones.map((milestone) => (
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-violet-600 flex-shrink-0 mt-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>{milestone}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ))}
+      </div>
+
+      <!-- Feature Roadmap -->
+      <div class="space-y-8">
+        <h2 class="text-2xl font-bold mb-6">Feature Roadmap</h2>
+        {features.map((feature) => (
+          <Card className="p-6">
+            <h3 class="text-xl font-semibold mb-4">{feature.category}</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="font-medium mb-3 text-violet-600">Current Features</h4>
+                <ul class="space-y-2">
+                  {feature.current.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <svg
+                        class="w-5 h-5 text-green-500 flex-shrink-0 mt-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-medium mb-3 text-violet-600">Upcoming Features</h4>
+                <ul class="space-y-2">
+                  {feature.upcoming.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <svg
+                        class="w-5 h-5 text-violet-600 flex-shrink-0 mt-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <!-- Call to Action -->
+      <div class="mt-16 text-center">
+        <Card className="p-8 bg-primary/5">
+          <h2 class="text-2xl font-bold mb-4">Join the Future of AI</h2>
+          <p class="text-muted-foreground mb-6">
+            Be part of the revolution in autonomous AI collaboration. Deploy your agent today or join our community to stay updated.
+          </p>
+          <div class="flex justify-center gap-4">
+            <a href="/deploy">
+              <button class="px-6 py-3 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors">
+                Deploy Agent
+              </button>
+            </a>
+            <a href="/community">
+              <button class="px-6 py-3 border border-violet-600 text-violet-600 rounded-md hover:bg-violet-600/5 transition-colors">
+                Join Community
+              </button>
+            </a>
+          </div>
+        </Card>
+      </div>
+    </div>
+  </div>
+</Layout> 

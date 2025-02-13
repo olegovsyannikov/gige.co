@@ -1,0 +1,196 @@
+---
+import Layout from './Layout.astro';
+import TableOfContents from '../components/TableOfContents';
+import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
+import { ChatConfigSchema } from '../schema/chat';
+
+interface Props {
+  entry: CollectionEntry<'docs'>;
+  headings?: MarkdownHeading[];
+}
+
+const { entry } = Astro.props;
+const { headings } = await entry.render();
+
+// Get raw content from the slot
+const rawContent = await Astro.slots.render('default');
+
+// Create documentation-specific chat configuration
+const docsSpecificConfig = ChatConfigSchema.parse({
+  systemPrompt: [{
+    type: "text" as const,
+    text: 
+`You are an expert documentation assistant for the ONE framework. Your role is to help users understand and implement ONE effectively.
+
+Core Knowledge:
+1. Framework Architecture
+   - Astro-based static site generation
+   - React components for interactivity
+   - Assistant UI for chat interfaces
+   - Vercel AI SDK for model integration
+   - Edge runtime optimization
+
+2. Technical Capabilities
+   - AI-powered chat systems
+   - Real-time message streaming
+   - Markdown content processing
+   - Dynamic page layouts
+   - Edge computing features
+   - TypeScript/JavaScript development
+
+3. Chat System Features
+   - Multiple panel modes (quarter, half, full, floating, icon)
+   - System prompt configuration
+   - Welcome screen customization
+   - Message history and branching
+   - Voice synthesis capabilities
+   - Code syntax highlighting
+
+4. Content Management
+   - Markdown-based documentation
+   - Blog system with multiple views
+   - Dynamic routing
+   - Asset optimization
+   - SEO configuration
+
+5. Commercial Features
+   - Full commercial usage rights
+   - White-label options
+   - Enterprise support
+   - Custom deployment options
+   - No royalty fees
+
+Response Guidelines:
+1. Base responses primarily on the current page content
+2. Reference related documentation when relevant
+3. Provide practical code examples
+4. Include implementation steps
+5. Suggest best practices
+6. Address common issues
+7. Reference the official documentation
+
+Remember to:
+- Be accurate and technical
+- Provide working code examples
+- Consider performance implications
+- Suggest security best practices
+- Reference documentation sections
+- Stay within the technical scope
+- Maintain professional tone`
+  }],
+  welcome: {
+    message: "👋 I'm the ONE documentation assistant. How can I help you understand this section better?",
+    avatar: "/icon.svg",
+    suggestions: [
+      {
+        label: "📚 Explain this page",
+        prompt: "Can you explain what this documentation page covers and how it fits into the overall framework?"
+      },
+      {
+        label: "🔍 Key concepts",
+        prompt: "What are the key concepts and features covered in this section?"
+      },
+      {
+        label: "💻 Code examples",
+        prompt: "Can you show me code examples for the features discussed on this page?"
+      },
+      {
+        label: "🚀 Implementation",
+        prompt: "How do I implement these features in my project?"
+      },
+      {
+        label: "⚡ Best practices",
+        prompt: "What are the best practices and performance considerations for this feature?"
+      }
+    ]
+  }
+});
+
+const pageData = {
+  title: entry.data.title,
+  description: entry.data.description,
+  type: "documentation",
+  chatConfig: docsSpecificConfig,
+  rightPanelMode: 'quarter' as const,
+  content: rawContent
+};
+---
+
+<script>
+  declare global {
+    interface Window {
+      handleTocVisibility: (isVisible: boolean) => void;
+    }
+  }
+  
+  document.addEventListener('astro:page-load', () => {
+    const main = document.querySelector('main');
+    const tocContainer = document.getElementById('toc-container');
+    
+    // Set initial TOC width
+    document.documentElement.style.setProperty('--toc-width', '16rem');
+    
+    window.handleTocVisibility = (isVisible: boolean) => {
+      // Update TOC container
+      if (tocContainer) {
+        tocContainer.style.width = isVisible ? 'var(--toc-width)' : '0';
+        tocContainer.style.opacity = isVisible ? '1' : '0';
+      }
+      
+      // Update main content
+      if (main) {
+        // Ensure main content expands properly
+        main.style.width = isVisible ? 'calc(100% - var(--toc-width))' : '100%';
+        main.style.maxWidth = isVisible ? 'calc(100% - var(--toc-width))' : '100%';
+      }
+    };
+  });
+</script>
+
+<Layout {...pageData}>
+  <div class="lg:flex relative">
+    <!-- Main Content -->
+    <main class="flex-1 min-w-0 transition-all duration-300 ease-in-out w-full" transition:animate="none">
+      <article class="py-8">
+        <header class="mb-8">
+          <div class="space-y-2">
+            {entry.data.section && (
+              <p class="text-sm font-medium text-muted-foreground">
+                {entry.data.section}
+              </p>
+            )}
+            <h1 class="text-3xl font-bold sm:text-4xl md:text-5xl">
+              {entry.data.title}
+            </h1>
+            {entry.data.description && (
+              <p class="text-lg sm:text-xl text-muted-foreground max-w-[750px]">
+                {entry.data.description}
+              </p>
+            )}
+          </div>
+        </header>
+        
+        <div class="prose dark:prose-invert max-w-none">
+          <slot />
+        </div>
+      </article>
+    </main>
+
+    <!-- Right Sidebar -->
+    <div
+      class="hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden max-w-[240px]"
+      id="toc-container"
+      style="width: var(--toc-width)"
+    >
+      <div class="pt-4">
+        <div class="pl-8 pr-4">
+          <TableOfContents 
+            headings={headings} 
+            client:media="(min-width: 1024px)" 
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

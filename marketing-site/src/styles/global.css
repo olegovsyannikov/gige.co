@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 240 5% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 10%;
+    --muted-foreground: 240 5% 64%;
+    --accent: 240 5% 10%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 20%;
+    --input: 240 5% 10%;
+    --ring: 240 5% 83%;
+    --chart-1: 210 90% 60%;
+    --chart-2: 160 80% 50%;
+    --chart-3: 30 90% 60%;
+    --chart-4: 280 85% 65%;
+    --chart-5: 340 85% 60%;
+    --radius: 0.5rem;
+    --sidebar-bg: hsl(240 5% 0%);
+    --sidebar-fg: 0 0% 93%;
+    --sidebar-hover: hsl(240 5% 10%);
+    --sidebar-active: hsl(240 5% 5%);
+    --sidebar-border: transparent;
+    --sidebar-radius: 0;
+    --sidebar-padding: 1rem;
+    --sidebar-item-spacing: 0.5rem;
+    --aui-thread-max-width: 42rem;
+    --sidebar-background: 240 5% 0%;
+    --sidebar-foreground: 240 5% 95%;
+    --sidebar-primary: 224 76% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-ring: 217 91% 60%;
+    /* Layout variables */
+    --header-height: 81px;
+    --footer-height: 40px;
+    --sidebar-width: 240px;
+    --sidebar-width-collapsed: 48px;
+    
+    /* Panel sizes */
+    --right-width-full: min(600px, 100vw);
+    --right-width-half: min(50%, 500px); 
+    --right-width-quarter: min(400px, 90vw);
+    --right-width-icon: 48px;
+
+    /* Animation timings */
+    --layout-timing: 200ms ease-in-out;
+    
+    /* Z-index layers */
+    --z-header: 40;
+    --z-sidebar: 30;
+    --z-panel: 20;
+    --z-overlay: 50;
+  }
+
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 93%;
+    --card: 240 10% 4%;
+    --card-foreground: 0 0% 93%;
+    --popover: 240 10% 4%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 240 5% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 10%;
+    --muted-foreground: 240 5% 64%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 240 10% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 20%;
+    --input: 240 5% 10%;
+    --ring: 217 91% 60%;
+    --chart-1: 210 90% 65%;
+    --chart-2: 160 85% 55%;
+    --chart-3: 30 95% 65%;
+    --chart-4: 280 90% 70%;
+    --chart-5: 340 90% 65%;
+    --sidebar-bg: hsl(240 10% 4%);
+    --sidebar-fg: 0 0% 93%;
+    --sidebar-hover: hsl(240 8% 12%);
+    --sidebar-active: hsl(240 10% 8%);
+    --sidebar-border: 240 5% 16%;
+    --sidebar-background: 240 10% 4%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  /* Dark mode overrides */
+  [data-theme="dark"] {
+    --background-overlay: hsla(240, 10%, 4%, 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add styles for code blocks */
+.prose pre {
+  @apply bg-[var(--sidebar-bg)] !important;
+}
+
+.prose code {
+  @apply bg-[var(--sidebar-bg)] text-[hsl(var(--sidebar-fg))] !important;
+}
+
+/* Optional: Style inline code differently if needed */
+.prose :not(pre) > code {
+  @apply px-1.5 py-0.5 rounded-md;
+}
+
+/* Scroll area styles */
+.aui-thread-viewport > [data-radix-scroll-area-viewport] {
+  @apply flex flex-col items-center self-stretch bg-inherit;
+  width: 100%;
+  height: 100%;
+}
+
+.prose {
+  @apply text-foreground;
+}
+
+.prose p {
+  @apply text-foreground;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply text-foreground;
+}
+
+.prose strong {
+  @apply text-foreground;
+}
+
+.prose a {
+  @apply text-foreground hover:text-muted-foreground;
+}
+
+.prose ul,
+.prose ol {
+  @apply text-foreground;
+}
+
+.prose blockquote {
+  @apply text-muted-foreground border-l-primary;
+}
+
+.prose code {
+  @apply text-foreground bg-muted;
+}
+
+.prose pre {
+  @apply bg-muted;
+}
+
+.prose pre code {
+  @apply text-foreground;
+}
+
+.prose thead {
+  @apply text-foreground border-border/20;
+}
+
+.prose tbody {
+  @apply text-foreground border-border/20;
+}
+
+.dark .prose {
+  @apply text-foreground;
+}
+
+/* Utility classes */
+.layout-transition {
+  transition: all var(--layout-timing);
+}
+
+/* Floating panel styles */
+.right-panel.floating {
+  @apply bg-black border border-border;
+  border-radius: var(--radius);
+  animation: floatIn var(--layout-timing) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.right-panel.floating header {
+  @apply bg-muted border-b border-border;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+
+.right-panel.floating main {
+  @apply p-4 bg-black;
+}
+
+/* Animations */
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.slide-enter {
+  animation: slideIn var(--layout-timing) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-exit {
+  animation: slideOut var(--layout-timing) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
