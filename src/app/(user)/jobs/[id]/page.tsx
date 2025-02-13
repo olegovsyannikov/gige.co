@@ -205,7 +205,7 @@ export default function JobDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Execution Log</CardTitle>
+            <CardTitle>Job Log</CardTitle>
             <CardDescription>
               History of job processing and updates
             </CardDescription>

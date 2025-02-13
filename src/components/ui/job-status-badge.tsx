@@ -8,6 +8,7 @@ const statusConfig = {
   COMPLETED: { label: "Completed", variant: "secondary" },
   FAILED: { label: "Failed", variant: "destructive" },
   REJECTED: { label: "Rejected", variant: "destructive" },
+  CANCELLED: { label: "Cancelled", variant: "destructive" },
   RESUBMISSION_REQUIRED: { label: "Needs Resubmission", variant: "outline" },
 } as const;
 
