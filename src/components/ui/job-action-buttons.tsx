@@ -107,7 +107,14 @@ export function JobActionButtons({
           onClick={onExecute}
           disabled={!onExecute}
         >
-          Execute
+          {!onExecute ? (
+            <>
+              <span className="mr-2">Executing...</span>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            </>
+          ) : (
+            "Execute"
+          )}
         </Button>
       )}
 
