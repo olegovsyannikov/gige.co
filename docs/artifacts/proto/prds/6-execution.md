@@ -2,81 +2,80 @@
 
 ## 6.1 Purpose
 
-Once assigned, the platform sends job data to the agent’s API endpoint. The agent responds with a result. **OpenAI** is used again (via a dedicated service with TanStack Query or a protected server-side route) to evaluate the agent’s result against acceptance criteria. If the result fails, the job is re-submitted or flagged for re-submission.
+Once a job is assigned to an agent, the platform waits for a **manual "Execute" action** from the user (or admin). When the user presses the **"Execute"** button, the system sends the job data to the agent’s API endpoint, receives the response, and uses OpenAI to validate the result against acceptance criteria. All requests (to the agent and the validator) are logged in the job logs for complete traceability.
 
 ## 6.2 User Stories
 
-- **System**: After a job is assigned, automatically send the job data to the agent.
-- **Agent**: Processes the job, returns a result in the specified output schema.
-- **System**: Uses OpenAI to evaluate whether the result meets acceptance criteria.
-  - If unsatisfactory, job is either re-submitted automatically or marked “Re-submission Required.”
-  - If satisfactory, job is marked “Completed.”
-- **Admin**: Can intervene to force re-check or manually mark complete if necessary.
+- **Client (User)**: After creating or editing a job, and once it has an assigned agent, I see an **"Execute"** button. Pressing it triggers the backend to run the job through the agent, then validate results.
+- **System**: Submits the job to the assigned agent, evaluates the response via OpenAI, and updates the job’s status accordingly.
+- **Admin**: Can also press **"Execute"** in the admin panel to force a re-run or re-submission if needed.
 
 ## 6.3 Functional Breakdown
 
-### 6.3.1 Backend
+### 6.3.1 Job States Overview
 
-1. **Submission to the Agent**:
+1. **Pending**: The job is created but not yet assigned an agent.
+2. **Assigned**: An agent is assigned to the job; the job is “active” but not yet executed.
+3. **In Execution**: The user (or admin) has pressed **"Execute"**, and the system is currently sending the request to the agent and validating the result.
+4. **Re-submission Required**: The job was executed, but the result failed validation. The user or admin must correct or re-try.
+5. **Completed**: The result is validated and accepted.
 
-   - The server compiles the job data (description, acceptance criteria, etc.) into the agent’s input schema and calls `agent.endpointURL`.
-   - Logs the request and response in `job_logs`.
+### 6.3.2 Backend
 
-2. **Agent Response Handling**:
+1. **"Execute" Job Endpoint** (e.g., `POST /api/jobs/[jobId]/execute`):
 
-   - The server verifies the response matches the agent’s output schema.
-   - Calls a dedicated service endpoint (e.g., `/api/openai/validate`) to check acceptance criteria with OpenAI:
-     - The agent’s result and the job’s acceptance criteria are passed as a prompt to OpenAI.
-     - OpenAI returns a classification or summary indicating success/failure or suggestions for improvement.
+   - **Request**:
+     - Contains the `jobId` in the URL.
+     - Verifies the job’s status is “Assigned” or “Re-submission Required” before proceeding.
+   - **Flow**:
+     1. Update job status to **"In Execution"**.
+     2. Send a request to the assigned agent’s `endpointURL`:
+        - Transform job data into agent’s input schema.
+        - Log this request to `job_logs` (including timestamp, payload).
+     3. Receive and parse the agent’s response:
+        - Validate it against the agent’s output schema.
+        - Log this response to `job_logs` (timestamp, payload).
+     4. Call OpenAI (or custom validator) to check if the agent’s output meets acceptance criteria:
+        - Log this request/response to `job_logs`.
+        - If **pass**, set job status to **"Completed"**, store final `result`.
+        - If **fail**, set job status to **"Re-submission Required"**.
+   - **Response**: Returns the updated job object (including new status and result, if successful).
 
-3. **Result Determination**:
+2. **Job Logging**:
+   - Every request to the agent endpoint and every request to the OpenAI validation service is recorded in the `job_logs` table:
+     - `jobId`, `timestamp`, `type` (agent_request, agent_response, validator_request, validator_response), `payload`, `status`.
 
-   - If **OpenAI** indicates the result meets acceptance criteria:
-     - Set `status = "Completed"` on the job.
-     - Store the final result in `jobs.result`.
-   - If **OpenAI** indicates failure or partial success:
-     - Mark `status = "Re-submission Required"`, or automatically attempt re-submission if that logic is desired (configurable).
-   - Log each evaluation in `job_logs`.
-
-4. **Admin Override**:
-   - Admin can forcibly call the OpenAI validation again or manually change the job status in the admin panel (`/admin/jobs/[jobId]`).
-
-### 6.3.2 Frontend (User)
+### 6.3.3 Frontend (User)
 
 - **Location**: `/jobs/[jobId]`
-  - Displays the job’s status (“Pending,” “In Progress,” “Re-submission Required,” “Completed,” etc.).
-  - Shows the final result if completed.
-  - Does **not** directly call OpenAI. The user-facing client only sees job status updates from the server.
+  - When the job’s status is **"Assigned"** or **"Re-submission Required"**, display an **"Execute"** button.
+  - Clicking **"Execute"** calls the `executeJob` function (a TanStack Query mutation) that hits `/api/jobs/[jobId]/execute`.
+  - The page listens for the API response; upon success:
+    - If the job status becomes **"Completed"**, show the final result.
+    - If **"Re-submission Required"**, prompt the user that the job failed validation and can be retried or edited.
 
-### 6.3.3 Frontend (Admin)
+### 6.3.4 Frontend (Admin)
 
-- **Location**: `/admin/jobs` or `/admin/jobs/[jobId]`
-  - Can trigger a re-check or a forced “Complete” action if necessary.
-  - A dedicated button or modal might invoke the `/api/openai/validate` service once more (or forcibly skip checks).
+- **Location**: `/admin/jobs/[jobId]` (or within the jobs table actions)
+  - Admin has the same **"Execute"** button to run or re-run the job.
+  - Additionally, the admin might see extended logs or override actions (force assign, force complete, etc.).
 
-## 6.4 Dedicated OpenAI Validation Service (via TanStack Query)
+## 6.4 Non-Functional Requirements
 
-- **Service**: A protected route (e.g., `/api/openai/validate`) or server-side function that interacts with OpenAI for acceptance criteria checks.
-- **Integration**:
-  - The server or admin panel can call this service to run content or acceptance checks.
-  - If used in the admin panel, the same TanStack Query approach can handle caching, error retries, and UI states (loading, success, error).
-- **Prompt Structure**:
-  - The job’s acceptance criteria and agent’s response are fed into a prompt that asks OpenAI: “Does this response satisfy the following acceptance criteria?”
-
-## 6.5 Non-Functional Requirements
-
-- **Security**:
-  - All OpenAI calls use a server-side route to protect the API key.
-  - Only authorized requests can invoke re-checks or force-complete actions.
 - **Reliability**:
-  - Must handle scenarios where the agent endpoint is unreachable or the OpenAI call fails.
-  - Implement retry logic or job fallback states if necessary.
+  - If agent endpoint fails or times out, the system should handle gracefully (job remains “Assigned” or returns to “Re-submission Required”).
+  - If OpenAI call fails, the system logs an error and the job remains “In Execution” until retried or fails safely.
 - **Traceability**:
-  - Each submission, response, and OpenAI evaluation is logged in `job_logs`.
+  - All requests (agent and validator) are stored in `job_logs`.
+  - Status changes (Pending → Assigned → In Execution → Completed / Re-submission Required) are easily reviewable in the logs.
+- **Performance**:
+  - The job execution is synchronous or asynchronous depending on implementation (serverless function or background job).
+  - The UI should display a loading state while “Execute” is in progress.
 
-## 6.6 Success Criteria
+## 6.5 Success Criteria
 
-- **Accurate Evaluations**: OpenAI reliably determines if the agent’s result meets acceptance criteria.
-- **Configurable Workflows**: Jobs that fail checks can be automatically re-submitted or flagged for manual intervention.
-- **Admin Controls**: Admin panel provides re-check or override options.
-- **End-to-End Logging**: The system captures each step (submission, response, validation) in `job_logs` for debugging.
+- **Manual Execution**: Users or admins can trigger job execution by pressing **"Execute"**.
+- **Logging**: Every request to the agent endpoint and OpenAI validator is recorded in `job_logs`.
+- **Accurate Status Updates**: The job’s status transitions correctly from “Assigned” → “In Execution” → “Completed” or “Re-submission Required.”
+- **User-Friendly**: The page updates with the final result or a notice that a re-submission is needed, providing clear feedback.
+- **Admin Oversight**: Admin can see logs and re-run jobs if necessary from the admin panel.
