@@ -1,5 +1,30 @@
 # Development Changelog
 
+## [0.3.5] - 2025-02-13
+
+### Changed
+
+- Enhanced Authentication System
+  - Improved user synchronization between Clerk and database
+  - Removed redirect-based sync in favor of direct API calls
+  - Added middleware-level user synchronization
+  - Optimized performance by eliminating redirect chains
+  - Enhanced error handling for sync failures
+
+### Technical
+
+- Updated middleware implementation:
+  - Direct API calls instead of redirects
+  - Proper error handling and logging
+  - Cookie forwarding for auth state preservation
+- Improved sync endpoint:
+  - Simplified response structure
+  - Better type safety
+  - Enhanced error reporting
+- Documentation updates:
+  - Updated auth implementation docs
+  - Added technical details for sync mechanism
+
 ## [0.3.4] - 2025-02-13
 
 ### Added

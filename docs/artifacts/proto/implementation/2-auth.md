@@ -2,7 +2,7 @@
 
 ## Overview
 
-Authentication is implemented using Clerk, providing secure user management and session handling. The system implements a double-layered protection mechanism with both middleware and API-level authorization checks, including role-based access control for admin features.
+Authentication is implemented using Clerk, providing secure user management and session handling. The system implements a double-layered protection mechanism with middleware and API-level authorization checks, including role-based access control for admin features. User data is automatically synchronized between Clerk and our database through middleware-level integration.
 
 ## Technical Implementation
 
@@ -28,13 +28,35 @@ Authentication is implemented using Clerk, providing secure user management and 
    export default authMiddleware({
      publicRoutes: ["/", "/api/public(.*)"],
      adminRoutes: ["/admin(.*)"],
-     afterAuth: (auth, req) => {
-       // Role verification and route protection
+     afterAuth: async (auth, req) => {
+       // User synchronization and role verification
+       if (auth.userId) {
+         await syncUser(auth.userId);
+       }
      },
    });
    ```
 
-2. **API Protection**
+2. **User Synchronization**
+
+   ```typescript
+   // Middleware-level sync
+   if (userId && isApiRoute(req)) {
+     const syncResponse = await fetch("/api/auth/sync", {
+       headers: { cookie: req.headers.get("cookie") || "" },
+     });
+     // Error handling and response processing
+   }
+
+   // Sync endpoint
+   export async function GET() {
+     const { userId } = await auth();
+     const dbUser = await findOrCreateUser(userId);
+     return NextResponse.json({ success: true, user: dbUser });
+   }
+   ```
+
+3. **API Protection**
    ```typescript
    export async function validateAdmin(userId: string) {
      const user = await clerkClient.users.getUser(userId);
@@ -50,6 +72,7 @@ export const authUtils = {
   validateAdmin: (userId: string) => Promise<boolean>,
   getUserRole: (userId: string) => Promise<UserRole>,
   updateUserRole: (userId: string, role: UserRole) => Promise<void>,
+  syncUser: (userId: string) => Promise<User>,
 };
 
 // Role Types
@@ -70,9 +93,9 @@ export const sessionUtils = {
 - ✅ API protection
 - ✅ Admin routes
 - ✅ Session management
+- ✅ Automatic user synchronization
 - ⏳ Role management UI
 - ❌ OAuth providers
-- ❌ Advanced permissions
 
 ## Technical Decisions
 
@@ -90,7 +113,14 @@ export const sessionUtils = {
    - Role-based routing
    - API-level checks
 
-3. **Session Handling**
+3. **User Synchronization**
+
+   - Middleware-level sync
+   - Direct API calls
+   - Error handling
+   - Performance optimization
+
+4. **Session Handling**
    - Secure token storage
    - Automatic token rotation
    - Cross-tab synchronization
@@ -112,12 +142,18 @@ export const sessionUtils = {
    - Session monitoring
 
 2. **Security**
+
    - 2FA implementation
    - Enhanced audit logging
    - IP-based restrictions
    - Rate limiting
 
+3. **Performance**
+   - Caching for user data
+   - Optimized sync mechanism
+   - Background sync for non-critical updates
+
 ---
 
 Last Updated: 2025-02-13
-Version: 0.3.3
+Version: 0.3.5
