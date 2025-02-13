@@ -70,6 +70,20 @@ export default function EditJobPage() {
     );
   }
 
+  // Prevent editing of non-pending jobs
+  if (job.status !== "PENDING") {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            This job cannot be edited because it is already {job.status.toLowerCase()}.
+            Only pending jobs can be edited.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   // Convert job to the correct type
   const jobWithDates = {
     ...job,

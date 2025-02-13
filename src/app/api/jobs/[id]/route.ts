@@ -89,7 +89,7 @@ export async function PUT(
     try {
       const data = updateJobSchema.parse(body);
 
-      // Get job to check ownership
+      // Get job to check ownership and status
       const job = await prisma.job.findUnique({
         where: { id: jobId },
       });
@@ -103,6 +103,14 @@ export async function PUT(
         return NextResponse.json(
           { error: "Not authorized to update this job" },
           { status: 403 }
+        );
+      }
+
+      // Only allow updates for pending jobs
+      if (job.status !== "PENDING") {
+        return NextResponse.json(
+          { error: "Only pending jobs can be edited" },
+          { status: 400 }
         );
       }
 
