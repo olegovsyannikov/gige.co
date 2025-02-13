@@ -10,28 +10,25 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Job } from "@prisma/client";
+import { Job } from "@/types/job";
 
 interface JobActionButtonsProps {
   job: Job;
-  onAutoAssign?: () => Promise<void>;
+  onAutoAssign?: () => void;
   onManualAssign?: () => void;
-  onResubmit?: () => Promise<void>;
-  onComplete?: () => Promise<void>;
-  onCancelAssignment?: () => Promise<void>;
+  onCancelAssignment?: () => void;
+  onExecute?: () => void;
 }
 
 export function JobActionButtons({
   job,
   onAutoAssign,
   onManualAssign,
-  onResubmit,
-  onComplete,
   onCancelAssignment,
+  onExecute,
 }: JobActionButtonsProps) {
   const isPending = job.status === "PENDING";
   const isAssigned = job.status === "ASSIGNED";
-  const isInProgress = job.status === "IN_PROGRESS";
   const needsResubmission = job.status === "RESUBMISSION_REQUIRED";
 
   return (
@@ -104,23 +101,23 @@ export function JobActionButtons({
         </AlertDialog>
       )}
 
-      {(needsResubmission || isAssigned) && (
+      {(isAssigned || needsResubmission) && (
         <Button
           variant="default"
-          onClick={onResubmit}
-          disabled={!onResubmit}
+          onClick={onExecute}
+          disabled={!onExecute}
         >
-          Resubmit
+          Execute
         </Button>
       )}
 
-      {isInProgress && (
+      {needsResubmission && (
         <Button
-          variant="default"
-          onClick={onComplete}
-          disabled={!onComplete}
+          variant="outline"
+          onClick={onAutoAssign}
+          disabled={!onAutoAssign}
         >
-          Complete
+          Reassign
         </Button>
       )}
     </div>

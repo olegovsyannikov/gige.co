@@ -2,6 +2,7 @@ import {
   autoAssignJob,
   cancelJobAssignment,
   createJob,
+  executeJob,
   forceCompleteJob,
   forceResubmitJob,
   getAllJobs,
@@ -37,10 +38,22 @@ export function useJobs() {
   };
 }
 
+export function useAllJobs() {
+  return useQuery({
+    queryKey: jobKeys.lists(),
+    queryFn: getAllJobs,
+  }) as {
+    data: JobListItem[] | undefined;
+    isLoading: boolean;
+    error: Error | null;
+  };
+}
+
 export function useJob(id: string) {
   return useQuery({
     queryKey: jobKeys.detail(id),
     queryFn: () => getJob(id),
+    enabled: !!id,
   }) as {
     data: Job | undefined;
     isLoading: boolean;
@@ -52,19 +65,9 @@ export function useJobLogs(jobId: string) {
   return useQuery({
     queryKey: jobKeys.logs(jobId),
     queryFn: () => getJobLogs(jobId),
+    enabled: !!jobId,
   }) as {
     data: JobLog[] | undefined;
-    isLoading: boolean;
-    error: Error | null;
-  };
-}
-
-export function useAllJobs() {
-  return useQuery({
-    queryKey: ["admin", "jobs"],
-    queryFn: getAllJobs,
-  }) as {
-    data: JobListItem[] | undefined;
     isLoading: boolean;
     error: Error | null;
   };
@@ -99,24 +102,11 @@ export function useUpdateJob() {
   });
 }
 
-export function useForceResubmitJob() {
+export function useAutoAssignJob() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => forceResubmitJob(id),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
-    },
-  });
-}
-
-export function useForceCompleteJob() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, result }: { id: string; result: JsonValue }) =>
-      forceCompleteJob(id, result),
+    mutationFn: autoAssignJob,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
@@ -137,14 +127,32 @@ export function useReassignJob() {
   });
 }
 
-export function useAutoAssignJob() {
+export function useForceResubmitJob() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => autoAssignJob(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: jobKeys.logs(id) });
+    mutationFn: forceResubmitJob,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+}
+
+export function useForceCompleteJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      result,
+    }: {
+      id: string;
+      result: JsonValue;
+    }): Promise<Job> => forceCompleteJob(id, result),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
     },
   });
 }
@@ -153,10 +161,23 @@ export function useCancelJobAssignment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => cancelJobAssignment(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: jobKeys.logs(id) });
+    mutationFn: cancelJobAssignment,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+}
+
+export function useExecuteJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: executeJob,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: jobKeys.logs(data.id) });
     },
   });
 }

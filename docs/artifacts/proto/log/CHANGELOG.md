@@ -1,5 +1,40 @@
 # Development Changelog
 
+## [0.4.0] - 2025-02-13
+
+### Added
+
+- Job Execution Implementation
+  - Manual execution trigger with Execute button
+  - OpenAI-based result validation
+  - Execution status tracking and logging
+  - Proper payload handling from assignment logs
+  - Enhanced UI components for execution flow
+  - Comprehensive error handling
+
+### Changed
+
+- Enhanced Job Action Buttons
+  - Added Execute button for assigned jobs
+  - Improved state handling for all actions
+  - Fixed button states for resubmission flow
+  - Added loading states for actions
+
+### Technical
+
+- Updated execution endpoint:
+  - Uses latest assigned log payload
+  - Proper validation flow
+  - Comprehensive error handling
+  - Status transition management
+- Improved validation service:
+  - Structured OpenAI prompts
+  - Retry mechanism for failures
+  - Clear error messaging
+- Documentation updates:
+  - Added execution implementation docs
+  - Updated technical details
+
 ## [0.3.5] - 2025-02-13
 
 ### Changed

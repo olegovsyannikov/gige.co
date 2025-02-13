@@ -18,8 +18,8 @@ export interface Job {
   result: JsonSchema | null;
   createdByUserId: string;
   assignedAgentId: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   agent?: {
     id: string;
     name: string;
@@ -39,7 +39,7 @@ export interface JobListItem {
   name: string;
   description: string;
   status: JobStatus;
-  createdAt: string;
+  createdAt: string | Date;
   agent?: {
     id: string;
     name: string;
@@ -61,5 +61,5 @@ export interface JobLog {
   responsePayload: JsonSchema | null;
   status: string;
   message: string | null;
-  createdAt: string;
+  createdAt: string | Date;
 }

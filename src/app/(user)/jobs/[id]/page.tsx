@@ -13,7 +13,13 @@ import { JobActionButtons } from "@/components/ui/job-action-buttons";
 import { JobLogItem } from "@/components/ui/job-log-item";
 import { JobStatusBadge } from "@/components/ui/job-status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAutoAssignJob, useCancelJobAssignment, useJob, useJobLogs } from "@/hooks/jobs";
+import {
+  useAutoAssignJob,
+  useCancelJobAssignment,
+  useExecuteJob,
+  useJob,
+  useJobLogs,
+} from "@/hooks/jobs";
 import { JobStatus } from "@prisma/client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -58,6 +64,7 @@ export default function JobDetailPage() {
 
   const { mutateAsync: autoAssign, isPending: isAssigning } = useAutoAssignJob();
   const { mutateAsync: cancelAssignment, isPending: isCancelling } = useCancelJobAssignment();
+  const { mutateAsync: execute, isPending: isExecuting } = useExecuteJob();
 
   async function handleAutoAssign() {
     setError(null);
@@ -80,6 +87,16 @@ export default function JobDetailPage() {
     } catch (error) {
       console.error("Error cancelling assignment:", error);
       setError(error instanceof Error ? error.message : "Failed to cancel assignment");
+    }
+  }
+
+  async function handleExecute() {
+    setError(null);
+    try {
+      await execute(id);
+    } catch (error) {
+      console.error("Error executing job:", error);
+      setError(error instanceof Error ? error.message : "Failed to execute job");
     }
   }
 
@@ -188,8 +205,9 @@ export default function JobDetailPage() {
               <JobActionButtons
                 job={jobWithTypedStatus}
                 onAutoAssign={isAssigning ? undefined : handleAutoAssign}
-                onManualAssign={isAssigning || isCancelling ? undefined : handleManualAssign}
+                onManualAssign={isAssigning || isCancelling || isExecuting ? undefined : handleManualAssign}
                 onCancelAssignment={isCancelling ? undefined : (job.status === "ASSIGNED" ? handleCancelAssignment : undefined)}
+                onExecute={isExecuting ? undefined : ((job.status === "ASSIGNED" || job.status === "RESUBMISSION_REQUIRED") ? handleExecute : undefined)}
               />
             </div>
           </CardContent>

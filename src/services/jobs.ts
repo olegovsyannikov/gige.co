@@ -6,8 +6,16 @@ export async function getJobs(): Promise<JobListItem[]> {
   return apiRequest("/jobs");
 }
 
+export async function getAllJobs(): Promise<JobListItem[]> {
+  return apiRequest("/admin/jobs");
+}
+
 export async function getJob(id: string): Promise<Job> {
   return apiRequest(`/jobs/${id}`);
+}
+
+export async function getJobLogs(id: string): Promise<JobLog[]> {
+  return apiRequest(`/jobs/${id}/logs`);
 }
 
 export async function createJob(data: {
@@ -28,13 +36,17 @@ export async function updateJob(id: string, data: Partial<Job>): Promise<Job> {
   });
 }
 
-export async function getJobLogs(jobId: string): Promise<JobLog[]> {
-  return apiRequest(`/jobs/${jobId}/logs`);
+export async function autoAssignJob(id: string): Promise<Job> {
+  return apiRequest(`/jobs/${id}/auto-assign`, {
+    method: "POST",
+  });
 }
 
-// Admin-only endpoints
-export async function getAllJobs(): Promise<JobListItem[]> {
-  return apiRequest("/admin/jobs");
+export async function reassignJob(id: string, agentId: string): Promise<Job> {
+  return apiRequest(`/jobs/${id}/assign`, {
+    method: "POST",
+    body: JSON.stringify({ agentId }),
+  });
 }
 
 export async function forceResubmitJob(id: string): Promise<Job> {
@@ -53,21 +65,14 @@ export async function forceCompleteJob(
   });
 }
 
-export async function reassignJob(id: string, agentId: string): Promise<Job> {
-  return apiRequest(`/admin/jobs/${id}/reassign`, {
-    method: "POST",
-    body: JSON.stringify({ agentId }),
-  });
-}
-
-export async function autoAssignJob(id: string): Promise<Job> {
-  return apiRequest(`/jobs/${id}/auto-assign`, {
-    method: "POST",
-  });
-}
-
 export async function cancelJobAssignment(id: string): Promise<Job> {
   return apiRequest(`/jobs/${id}/cancel`, {
+    method: "POST",
+  });
+}
+
+export async function executeJob(id: string): Promise<Job> {
+  return apiRequest(`/jobs/${id}/execute`, {
     method: "POST",
   });
 }
