@@ -133,9 +133,6 @@ export default function JobDetailPage() {
     createdAt: new Date(log.createdAt),
   }));
 
-  console.log('isCancelling', isCancelling)
-  console.log('job.status', job.status)
-
   return (
     <div className="container mx-auto p-6">
       <div className="space-y-6">

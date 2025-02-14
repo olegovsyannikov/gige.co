@@ -5,11 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    console.log("GET /api/jobs - Start");
     const user = await requireDbUser(req);
-    console.log("Authenticated user:", user);
-
-    console.log("Fetching jobs for internal userId:", user.id);
     const jobs = await prisma.job.findMany({
       where: {
         createdByUserId: user.id,
@@ -31,13 +27,10 @@ export async function GET(req: NextRequest) {
         },
       },
     });
-    console.log("Found jobs:", jobs);
 
     const response: ApiResponse<typeof jobs> = {
       data: jobs,
     };
-
-    console.log("GET /api/jobs - Success");
     return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error in GET /api/jobs:", error);
@@ -64,14 +57,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("POST /api/jobs - Start");
     const user = await requireDbUser(req);
-    console.log("Authenticated user:", user);
 
     let body;
     try {
       body = await req.json();
-      console.log("Received request body:", body);
     } catch (e) {
       console.error("Error parsing request body:", e);
       return NextResponse.json(
@@ -86,14 +76,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, description, acceptanceCriteria } = body || {};
-    console.log("Extracted job data:", {
-      name,
-      description,
-      acceptanceCriteria,
-    });
 
     if (!name || !description || !acceptanceCriteria) {
-      console.log("Missing required fields");
       return NextResponse.json(
         {
           error: {
@@ -106,7 +90,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Creating job with userId:", user.id);
     const job = await prisma.job.create({
       data: {
         name,
@@ -129,13 +112,11 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-    console.log("Job created:", job);
 
     const response: ApiResponse<typeof job> = {
       data: job,
     };
 
-    console.log("POST /api/jobs - Success");
     return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error in POST /api/jobs:", error);

@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function requireDbUser(req: NextRequest) {
-  console.log("requireDbUser", req);
   const { userId } = getAuth(req);
   if (!userId) {
     throw new Error("Not authenticated");

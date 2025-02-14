@@ -101,12 +101,6 @@ export default function AssignJobPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<(typeof agents)[number] | null>(null);
 
-  // Add logging for debugging
-  useEffect(() => {
-    console.log('Agents:', agents);
-    console.log('Available agents:', agents.filter((agent) => agent.isActive));
-  }, [agents]);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(
       selectedAgent?.inputSchema
