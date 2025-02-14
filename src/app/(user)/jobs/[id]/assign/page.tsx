@@ -58,7 +58,8 @@ function AssignFormSkeleton() {
 
 interface FormValues {
   agentId: string;
-  [key: string]: string | number | unknown;
+  generateInput: boolean;
+  [key: string]: string | number | boolean | unknown;
 }
 
 interface ExtendedJsonSchema extends JsonSchema {
@@ -70,6 +71,7 @@ function createDynamicSchema(inputSchema: JsonSchema | undefined) {
     agentId: z.string({
       required_error: "Please select an agent",
     }),
+    generateInput: z.boolean().default(true),
   };
 
   if (inputSchema?.type === "object" && inputSchema.properties) {
@@ -109,14 +111,29 @@ export default function AssignJobPage() {
     resolver: zodResolver(
       selectedAgent?.inputSchema
         ? createDynamicSchema(selectedAgent.inputSchema as JsonSchema)
-        : z.object({ agentId: z.string() })
+        : z.object({
+            agentId: z.string(),
+            generateInput: z.boolean().default(true),
+          })
     ),
+    defaultValues: {
+      generateInput: true,
+      agentId: selectedAgent?.id || "",
+    },
   });
 
   // Reset form when agent changes
   useEffect(() => {
     if (selectedAgent) {
-      form.reset({ agentId: selectedAgent.id });
+      const currentGenerateInput = form.getValues("generateInput");
+      form.reset({
+        agentId: selectedAgent.id,
+        generateInput: currentGenerateInput,
+        // Reset other fields to undefined
+        ...Object.keys(form.getValues())
+          .filter(key => key !== "agentId" && key !== "generateInput")
+          .reduce((acc, key) => ({ ...acc, [key]: undefined }), {}),
+      });
     }
   }, [selectedAgent, form]);
 
@@ -125,15 +142,18 @@ export default function AssignJobPage() {
       setIsSubmitting(true);
       setError(null);
 
-      const { agentId, ...userInputs } = data;
+      const { agentId, generateInput, ...userInputs } = data;
+
+      const requestBody = {
+        agentId,
+        generateInput,
+        ...(generateInput ? {} : { userInputs }),
+      };
 
       const response = await fetch(`/api/jobs/${id}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentId,
-          userInputs,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -160,6 +180,8 @@ export default function AssignJobPage() {
   function renderField(field: string, schema: ExtendedJsonSchema) {
     const type = schema.type;
     const description = schema.description;
+    const generateInput = form.watch("generateInput");
+    const isDisabled = generateInput;
 
     if (type === "string") {
       if (schema.format === "textarea") {
@@ -168,6 +190,7 @@ export default function AssignJobPage() {
             {...form.register(field)}
             placeholder={description}
             className="h-32"
+            disabled={isDisabled}
           />
         );
       }
@@ -176,6 +199,7 @@ export default function AssignJobPage() {
           {...form.register(field)}
           type="text"
           placeholder={description}
+          disabled={isDisabled}
         />
       );
     }
@@ -186,6 +210,7 @@ export default function AssignJobPage() {
           {...form.register(field, { valueAsNumber: true })}
           type="number"
           placeholder={description}
+          disabled={isDisabled}
         />
       );
     }
@@ -212,7 +237,7 @@ export default function AssignJobPage() {
   const availableAgents = agents.filter((agent) => agent.isActive);
 
   return (
-    <div className="container mx-auto  p-6">
+    <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
           <CardTitle>Assign Job</CardTitle>
@@ -255,56 +280,68 @@ export default function AssignJobPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Choose an agent to handle this job
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {selectedAgent?.inputSchema && (
-                <div className="space-y-4">
-                  {Object.entries(selectedAgent.inputSchema.properties || {}).map(
-                    ([key, prop]) => (
-                      <FormField
-                        key={key}
-                        control={form.control}
-                        name={key}
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>
-                              {prop.title || key}
-                              {prop.required && (
-                                <span className="text-destructive"> *</span>
-                              )}
-                            </FormLabel>
-                            <FormControl>
-                              {renderField(key, prop as ExtendedJsonSchema)}
-                            </FormControl>
-                            {prop.description && (
-                              <FormDescription>{prop.description}</FormDescription>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )
+              {selectedAgent && (
+                <FormField
+                  control={form.control}
+                  name="generateInput"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Generate agent input from job description</FormLabel>
+                        <FormDescription>
+                          When enabled, the agent will automatically generate input based on the job description.
+                          Uncheck to manually provide input values.
+                        </FormDescription>
+                      </div>
+                    </FormItem>
                   )}
-                </div>
+                />
               )}
 
-              <div className="flex justify-end gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/jobs/${id}`)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Assigning..." : "Assign"}
-                </Button>
-              </div>
+              {selectedAgent?.inputSchema &&
+                (selectedAgent.inputSchema as JsonSchema).type === "object" &&
+                (selectedAgent.inputSchema as JsonSchema).properties &&
+                Object.entries(
+                  (selectedAgent.inputSchema as JsonSchema).properties || {}
+                ).map(([field, schema]) => (
+                  <FormField
+                    key={field}
+                    control={form.control}
+                    name={field}
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>
+                          {schema.title || field}
+                          {schema.required && <span className="text-red-500 ml-1">*</span>}
+                        </FormLabel>
+                        <FormControl>
+                          {renderField(field, schema as ExtendedJsonSchema)}
+                        </FormControl>
+                        {schema.description && (
+                          <FormDescription>{schema.description}</FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Assigning..." : "Assign"}
+              </Button>
             </form>
           </Form>
         </CardContent>

@@ -14,12 +14,30 @@ export async function POST(
     const { id: jobId } = await params;
     const body = await req.json();
     const { agentId, userInputs } = body;
+    const generateInput = body.generateInput ?? false;
 
-    if (!agentId || !userInputs) {
+    if (!agentId) {
       return NextResponse.json(
         {
           error: {
-            message: "Agent ID and user inputs are required",
+            message: "Agent ID is required",
+            status: 400,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // Only require userInputs when not using auto-generation
+    if (
+      !generateInput &&
+      (!userInputs || Object.keys(userInputs).length === 0)
+    ) {
+      return NextResponse.json(
+        {
+          error: {
+            message:
+              "User inputs are required when auto-generation is disabled",
             status: 400,
           },
         },
@@ -73,28 +91,50 @@ export async function POST(
       }
     }
 
-    // Generate payload from user inputs
-    const payloadResult = await generatePayload({
-      agentId: agent.id,
-      agentName: agent.name,
-      inputSchema: agent.inputSchema as JsonSchema,
-      userInputs,
-      jobDescription: job.description,
-      jobRequirements: job.acceptanceCriteria,
-    });
+    let requestPayload: Prisma.JsonObject;
 
-    // If there are validation errors, return them
-    if (payloadResult.validationErrors?.length) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Invalid inputs",
-            validationErrors: payloadResult.validationErrors,
-            status: 400,
+    if (generateInput) {
+      // Generate payload from user inputs using AI
+      const payloadResult = await generatePayload({
+        agentId: agent.id,
+        agentName: agent.name,
+        inputSchema: agent.inputSchema as JsonSchema,
+        userInputs,
+        jobDescription: job.description,
+        jobRequirements: job.acceptanceCriteria,
+      });
+
+      // If there are validation errors, return them
+      if (payloadResult.validationErrors?.length) {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Invalid inputs",
+              validationErrors: payloadResult.validationErrors,
+              status: 400,
+            },
           },
-        },
-        { status: 400 }
-      );
+          { status: 400 }
+        );
+      }
+
+      // Check if payload is undefined or null
+      if (!payloadResult.payload) {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Failed to generate input payload",
+              status: 400,
+            },
+          },
+          { status: 400 }
+        );
+      }
+
+      requestPayload = payloadResult.payload as Prisma.JsonObject;
+    } else {
+      // Use user inputs directly as payload
+      requestPayload = userInputs as Prisma.JsonObject;
     }
 
     // Update job with assigned agent and create log
@@ -131,8 +171,10 @@ export async function POST(
           jobId,
           agentId,
           status: "ASSIGNED",
-          message: "Agent manually assigned by user",
-          requestPayload: payloadResult.payload as Prisma.JsonObject,
+          message: generateInput
+            ? "Agent manually assigned by user with AI-generated input"
+            : "Agent manually assigned by user with custom input",
+          requestPayload,
         },
       }),
     ]);

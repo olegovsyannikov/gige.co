@@ -23,10 +23,13 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // Only allow cancellation of assigned jobs
-    if (job.status !== "ASSIGNED") {
+    // Allow cancellation of assigned jobs and jobs that need resubmission
+    if (job.status !== "ASSIGNED" && job.status !== "RESUBMISSION_REQUIRED") {
       return NextResponse.json(
-        { error: "Only assigned jobs can be cancelled" },
+        {
+          error:
+            "Only assigned jobs or jobs that need resubmission can be cancelled",
+        },
         { status: 400 }
       );
     }

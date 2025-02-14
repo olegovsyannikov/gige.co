@@ -133,6 +133,9 @@ export default function JobDetailPage() {
     createdAt: new Date(log.createdAt),
   }));
 
+  console.log('isCancelling', isCancelling)
+  console.log('job.status', job.status)
+
   return (
     <div className="container mx-auto p-6">
       <div className="space-y-6">
@@ -206,7 +209,7 @@ export default function JobDetailPage() {
                 job={jobWithTypedStatus}
                 onAutoAssign={isAssigning ? undefined : handleAutoAssign}
                 onManualAssign={isAssigning || isCancelling || isExecuting ? undefined : handleManualAssign}
-                onCancelAssignment={isCancelling ? undefined : (job.status === "ASSIGNED" ? handleCancelAssignment : undefined)}
+                onCancelAssignment={isCancelling ? undefined : (job.status === "ASSIGNED" || job.status === "RESUBMISSION_REQUIRED" ? handleCancelAssignment : undefined)}
                 onExecute={isExecuting ? undefined : ((job.status === "ASSIGNED" || job.status === "RESUBMISSION_REQUIRED") ? handleExecute : undefined)}
               />
             </div>
