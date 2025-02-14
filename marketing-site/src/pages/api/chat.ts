@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import type { APIRoute } from 'astro';
 import 'dotenv/config';
 import { openai } from "@ai-sdk/openai";
@@ -13,31 +15,52 @@ interface ChatRequest {
   config: ChatConfig;
 }
 
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      ANTHROPIC_API_KEY?: string;
+      VITE_ANTHROPIC_API_KEY?: string;
+      PUBLIC_ANTHROPIC_API_KEY?: string;
+      MISTRAL_API_KEY?: string;
+      OPENAI_API_KEY?: string;
+      VERCEL_ENV?: string;
+    }
+  }
+}
+
+const getAnthropicKey = (): string => {
+  // In Vercel's Edge Runtime, environment variables are available directly
+  const key = process.env.ANTHROPIC_API_KEY;
+              
+  if (!key) {
+    console.error('Anthropic API key not found in environment variables');
+    throw new Error('ANTHROPIC_API_KEY not configured in Vercel environment');
+  }
+  
+  return key;
+};
+
 const getProvider = (config: ChatConfig) => {
- 
   switch (config.provider) {
-    case 'anthropic':
-      if (!process.env.ANTHROPIC_API_KEY) {
-        throw new Error('ANTHROPIC_API_KEY not configured');
-      }
-      return anthropic(config.model);
+    case 'anthropic': {
+      const anthropicKey = getAnthropicKey();
+      return anthropic(config.model, {
+        anthropicApiKey: anthropicKey,
+        maxTokens: config.maxTokens,
+        temperature: config.temperature
+      });
+    }
       
     case 'mistral':
-      const mistralKey = process.env.MISTRAL_API_KEY;
-      console.log('Mistral API Key:', {
-        key: mistralKey,
-        length: mistralKey?.length,
-        isDefined: typeof mistralKey !== 'undefined'
-      });
-      if (!mistralKey) {
-        throw new Error('MISTRAL_API_KEY not configured');
+      if (!process.env.MISTRAL_API_KEY) {
+        throw new Error('MISTRAL_API_KEY not configured in Vercel environment');
       }
       return mistral(config.model);
       
     case 'openai':
     default:
       if (!process.env.OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY not configured');
+        throw new Error('OPENAI_API_KEY not configured in Vercel environment');
       }
       return openai(config.model);
   }
@@ -48,23 +71,14 @@ export const POST: APIRoute = async ({ request }) => {
     const requestData = await request.json() as ChatRequest;
     const config = {
       ...requestData.config,
-      provider: requestData.config?.provider || 'openai',
-      model: requestData.config?.model || 'gpt-4o-mini'
+      provider: requestData.config?.provider || 'anthropic',
+      model: requestData.config?.model || 'claude-3-opus-20240229'
     };
 
     // Check environment variables early
-    const envKey = `${config.provider.toUpperCase()}_API_KEY`;
-    const apiKey = process.env[envKey];
-    console.log(`Checking ${envKey}:`, {
-      key: apiKey,
-      length: apiKey?.length,
-      isDefined: typeof apiKey !== 'undefined',
-      provider: config.provider,
-      model: config.model
-    });
-    if (!apiKey) {
-      console.error(`Environment variable ${envKey} is not loaded properly`);
-      throw new Error(`Missing ${envKey} in environment variables`);
+    if (config.provider === 'anthropic') {
+      // Verify Anthropic key is available
+      getAnthropicKey();
     }
 
     // Transform messages to the format expected by the AI provider
@@ -82,8 +96,6 @@ export const POST: APIRoute = async ({ request }) => {
         }]
       };
     });
-
-    console.log('Sending messages:', JSON.stringify(messages, null, 2));
 
     const handler = createEdgeRuntimeAPI({
       model: getProvider(config),
@@ -107,12 +119,14 @@ export const POST: APIRoute = async ({ request }) => {
     return response;
 
   } catch (error) {
+    console.error('Chat API error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('Chat API error:', errorMessage);
     return new Response(
       JSON.stringify({ 
         error: errorMessage,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        provider: 'anthropic',
+        environment: process.env.VERCEL_ENV || 'production'
       }),
       { 
         status: 500,

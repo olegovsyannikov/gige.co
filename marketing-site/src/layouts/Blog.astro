@@ -15,8 +15,8 @@ const rawContent = await Astro.slots.render("default");
 
 // Create blog-specific chat configuration
 const blogSpecificConfig = ChatConfigSchema.parse({
-  provider: "mistral",
-  model: "mistral-large-latest",
+  provider: "anthropic",
+  model: "claude-3-opus-20240229",
   systemPrompt: [
     {
       type: "text" as const,

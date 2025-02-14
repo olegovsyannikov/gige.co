@@ -4,8 +4,8 @@ import { ChatConfigSchema } from '../schema/chat';
 
 // You can override any default values here
 const chatConfig = ChatConfigSchema.parse({
-  provider: "mistral",
-  model: "mistral-large-latest",
+  provider: "anthropic",
+  model: "claude-3-opus-20240229",
   systemPrompt: [{
     type: "text" as const,
     text: `You are GIGEco's AI marketplace expert, helping users understand how to deploy and monetize AI agents in our decentralized marketplace. Your role is to guide visitors through our platform that enables autonomous AI collaboration and agent-to-agent transactions.
