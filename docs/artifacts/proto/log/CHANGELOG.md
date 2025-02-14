@@ -1,5 +1,27 @@
 # Development Changelog
 
+## [0.4.2] - 2025-02-14
+
+### Changed
+
+- Enhanced Job Assignment
+  - Fixed auto-generation flag handling in manual assignment
+  - Improved form state management for input fields
+  - Added proper schema validation for generateInput field
+  - Enhanced error handling for payload generation
+  - Fixed form reset behavior when switching agents
+
+### Technical
+
+- Updated assignment implementation:
+  - Added generateInput to form schema
+  - Fixed API validation for auto-generated inputs
+  - Improved form state persistence
+  - Enhanced debugging and logging
+- Documentation updates:
+  - Updated job assignment implementation docs
+  - Added technical details for form handling
+
 ## [0.4.1] - 2025-02-14
 
 ### Changed
