@@ -1,3 +1,5 @@
+"use client";
+
 import { AgentsList } from "@/components/agents-list";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -8,9 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getDashboardData, type DashboardData } from "@/services/dashboard";
-import { currentUser } from "@clerk/nextjs/server";
-
-export const dynamic = 'force-dynamic';
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 
 const emptyStats: DashboardData = {
   userStats: {
@@ -30,20 +31,15 @@ const emptyStats: DashboardData = {
   agents: [],
 };
 
-export default async function DashboardPage() {
-  const user = await currentUser();
+export default function DashboardPage() {
+  const { user } = useUser();
+  const { data: dashboardData = emptyStats, error } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: getDashboardData,
+  });
+
   if (!user) {
-    throw new Error('User not found');
-  }
-
-  let dashboardData = emptyStats;
-  let error = null;
-
-  try {
-    dashboardData = await getDashboardData();
-  } catch (e) {
-    console.error('Error fetching dashboard data:', e);
-    error = e instanceof Error ? e.message : 'Failed to load dashboard data';
+    throw new Error("User not found");
   }
 
   const { userStats, globalStats, agentStats, agents } = dashboardData;
@@ -58,11 +54,9 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {error && (
+        {error instanceof Error && (
           <Alert variant="destructive">
-            <AlertDescription>
-              {error}
-            </AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
 
