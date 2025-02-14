@@ -30,6 +30,8 @@ model Agent {
   outputSchema Json      // JSON schema for agent output
   keywords     String    // Comma-separated keywords
   isActive     Boolean   @default(true)
+  safeAddress  String?   // Safe wallet address
+  safeTxHash   String?   // Transaction hash of Safe creation
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   jobs         Job[]     // Jobs assigned to this agent

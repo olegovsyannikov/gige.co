@@ -1,4 +1,5 @@
 import { AgentForm } from "@/components/forms/agent-form";
+import { AgentSafeInfo } from "@/components/safe/agent-safe-info";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
@@ -27,7 +28,10 @@ export default async function EditAgentPage({ params }: Props) {
       <h2 className="text-xl font-semibold">
         {agent ? "Edit Agent" : "Add New Agent"}
       </h2>
-      <AgentForm agent={agent} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <AgentForm agent={agent} />
+        {agent && <AgentSafeInfo agent={agent} />}
+      </div>
     </div>
   );
 }

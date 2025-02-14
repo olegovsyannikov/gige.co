@@ -1,5 +1,33 @@
 # Development Changelog
 
+## [0.4.3] - 2025-02-14
+
+### Added
+
+- Smart Contract Implementation
+  - Deployed upgradeable Registry contract
+  - Implemented agent registration functionality
+  - Added job assignment and status logging
+  - Created comprehensive test suite
+  - Added error handling and validation
+  - Integrated with Safe wallet system
+
+### Technical
+
+- Contract Implementation:
+  - UUPS upgradeable pattern with OpenZeppelin
+  - Event-driven architecture for state changes
+  - Gas-optimized storage layout
+  - Comprehensive access control
+- Testing Infrastructure:
+  - Modular test scripts for each function
+  - Error case validation
+  - Gas usage reporting
+  - Event verification
+- Documentation updates:
+  - Added smart contract implementation docs
+  - Updated technical details for blockchain integration
+
 ## [0.4.2] - 2025-02-14
 
 ### Changed
