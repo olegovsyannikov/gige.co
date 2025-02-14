@@ -4,7 +4,8 @@ import {
   createRouteMatcher,
 } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/admin(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/jobs(.*)"]);
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
@@ -14,7 +15,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Check for admin role if accessing admin routes
-  if (userId && isProtectedRoute(req)) {
+  if (userId && isAdminRoute(req)) {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
 

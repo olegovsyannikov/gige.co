@@ -1,5 +1,6 @@
     "use client";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
@@ -20,7 +21,7 @@ export function Navbar({ items, title }: NavbarProps) {
 
   return (
     <div className="border-b">
-      <div className="container flex h-16 items-center px-4">
+      <div className="max-w-screen-xl mx-auto flex h-16 items-center px-4">
         <div className="flex items-center space-x-6">
           <Link href="/" className="font-bold">
             {title}
@@ -40,6 +41,7 @@ export function Navbar({ items, title }: NavbarProps) {
         </div>
         <div className="ml-auto flex items-center space-x-4">
           <UserButton afterSignOutUrl="/" />
+          <ThemeToggle />
         </div>
       </div>
     </div>

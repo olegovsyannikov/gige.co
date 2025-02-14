@@ -22,6 +22,7 @@ export async function apiRequest<T>(
 
   try {
     const response = await fetch(url, {
+      credentials: "include",
       ...options,
       headers: {
         "Content-Type": "application/json",

@@ -24,7 +24,7 @@ export default function UserLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar items={userNavItems} title="AI Jobs Platform" />
+      <Navbar items={userNavItems} title="Gige.co" />
       <main className="flex-1">{children}</main>
     </div>
   );
