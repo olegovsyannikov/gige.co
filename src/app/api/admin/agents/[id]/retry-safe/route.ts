@@ -46,15 +46,24 @@ export async function POST(
     }
 
     if (agent.safeAddress) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Agent already has a Safe wallet",
-            status: 400,
+      // If Safe exists, verify its code on chain
+      const provider = safeService.getProvider();
+      const code = await provider.getCode(agent.safeAddress);
+
+      if (code !== "0x") {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Agent already has a valid Safe wallet",
+              status: 400,
+            },
           },
-        },
-        { status: 400 }
-      );
+          { status: 400 }
+        );
+      }
+
+      // If no code at address, allow retry
+      console.log(`No code found at ${agent.safeAddress}, allowing retry`);
     }
 
     // Deploy Safe wallet
@@ -75,14 +84,14 @@ export async function POST(
 
     return NextResponse.json(response);
   } catch (error: unknown) {
-    console.error("Error deploying Safe wallet:", error);
+    console.error("Error retrying Safe deployment:", error);
     return NextResponse.json(
       {
         error: {
           message:
             error instanceof Error
               ? error.message
-              : "Failed to deploy Safe wallet",
+              : "Failed to retry Safe deployment",
           status: 500,
         },
       },

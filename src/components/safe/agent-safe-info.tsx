@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { SAFE_CONFIG } from "@/lib/safe/config";
 import type { Agent } from "@prisma/client";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { AlertCircle, ExternalLink, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -14,11 +14,14 @@ interface Props {
 
 export function AgentSafeInfo({ agent }: Props) {
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
 
   const handleDeploySafe = async () => {
     try {
       setIsDeploying(true);
+      setHasError(false);
       const response = await fetch(`/api/admin/agents/${agent.id}/deploy-safe`, {
         method: "POST",
       });
@@ -36,6 +39,7 @@ export function AgentSafeInfo({ agent }: Props) {
       // Refresh the page to show updated Safe info
       window.location.reload();
     } catch (error) {
+      setHasError(true);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred",
@@ -43,6 +47,38 @@ export function AgentSafeInfo({ agent }: Props) {
       });
     } finally {
       setIsDeploying(false);
+    }
+  };
+
+  const handleRetrySafeDeployment = async () => {
+    try {
+      setIsRetrying(true);
+      setHasError(false);
+      const response = await fetch(`/api/admin/agents/${agent.id}/retry-safe`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || "Failed to retry Safe deployment");
+      }
+
+      toast({
+        title: "Success",
+        description: "Safe wallet deployment retried successfully",
+      });
+
+      // Refresh the page to show updated Safe info
+      window.location.reload();
+    } catch (error) {
+      setHasError(true);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRetrying(false);
     }
   };
 
@@ -101,6 +137,31 @@ export function AgentSafeInfo({ agent }: Props) {
                 </a>
               </div>
             </div>
+            {hasError && (
+              <div className="mt-4 space-y-4">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">
+                    There was an error with the Safe deployment
+                  </span>
+                </div>
+                <Button
+                  onClick={handleRetrySafeDeployment}
+                  disabled={isRetrying}
+                  variant="secondary"
+                  className="w-full"
+                >
+                  {isRetrying ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Retrying deployment...
+                    </>
+                  ) : (
+                    "Retry Deployment"
+                  )}
+                </Button>
+              </div>
+            )}
           </>
         ) : (
           <div className="space-y-4">

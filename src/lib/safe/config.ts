@@ -1,23 +1,65 @@
-import { ethers } from "ethers";
+import { createPublicClient, createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { sepolia } from "viem/chains";
 
 // Safe configuration
 export const SAFE_CONFIG = {
   chainId: process.env.NEXT_PUBLIC_CHAIN_ID || "11155111", // Sepolia testnet
   rpcUrl: process.env.GOERLI_RPC_URL || "",
   registryAddress: process.env.REGISTRY_CONTRACT_ADDRESS || "",
+  network: {
+    name: "sepolia",
+    chainId: 11155111,
+  },
 };
 
-// Initialize ethers provider and signer
+// Initialize viem clients
 export const getProvider = () => {
-  return new ethers.providers.JsonRpcProvider(SAFE_CONFIG.rpcUrl);
+  const rpcUrl = SAFE_CONFIG.rpcUrl;
+  console.log(
+    "Initializing provider with RPC URL:",
+    rpcUrl.replace(/\/.*@/, "/***@")
+  );
+
+  if (!rpcUrl) {
+    throw new Error("RPC URL not configured");
+  }
+
+  const transport = http(rpcUrl);
+
+  return createPublicClient({
+    chain: sepolia,
+    transport,
+  });
 };
 
 export const getSigner = () => {
-  const provider = getProvider();
-  if (!process.env.ADMIN_PRIVATE_KEY) {
+  const privateKey = process.env.ADMIN_PRIVATE_KEY;
+  if (!privateKey) {
     throw new Error("Admin private key not configured");
   }
-  return new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
+
+  // Ensure private key has 0x prefix
+  const formattedKey = privateKey.startsWith("0x")
+    ? privateKey
+    : `0x${privateKey}`;
+
+  try {
+    const account = privateKeyToAccount(formattedKey as `0x${string}`);
+    const transport = http(SAFE_CONFIG.rpcUrl);
+
+    return createWalletClient({
+      account,
+      chain: sepolia,
+      transport,
+    });
+  } catch (error) {
+    throw new Error(
+      `Failed to create wallet client: ${
+        error instanceof Error ? error.message : "Invalid private key format"
+      }`
+    );
+  }
 };
 
 // Registry contract ABI

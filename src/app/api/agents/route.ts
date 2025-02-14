@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    console.log("Fetching agents from database...");
     const agents = await prisma.agent.findMany({
       where: {
         isActive: true,
@@ -19,6 +20,7 @@ export async function GET() {
         inputSchema: true,
         outputSchema: true,
         isActive: true,
+        safeAddress: true,
         _count: {
           select: {
             jobs: true,
@@ -27,9 +29,13 @@ export async function GET() {
       },
     });
 
+    console.log("Agents fetched:", JSON.stringify(agents, null, 2));
+
     const response: ApiResponse<typeof agents> = {
       data: agents,
     };
+
+    console.log("Sending response:", JSON.stringify(response, null, 2));
 
     return NextResponse.json(response);
   } catch (error: unknown) {
