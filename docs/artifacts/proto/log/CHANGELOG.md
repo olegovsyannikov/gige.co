@@ -1,5 +1,27 @@
 # Development Changelog
 
+## [0.4.1] - 2025-02-14
+
+### Changed
+
+- Enhanced Authentication System
+  - Replaced `getDbUser` with `requireDbUser` across all API routes
+  - Standardized error handling for authentication failures
+  - Improved ownership checks in job-related routes
+  - Consistent API response format for auth errors
+  - Better type safety for auth-related responses
+
+### Technical
+
+- Updated API routes implementation:
+  - Centralized authentication using `requireDbUser`
+  - Consistent error response structure
+  - Improved ownership validation in queries
+  - Enhanced type safety for responses
+- Documentation updates:
+  - Updated auth implementation docs
+  - Added technical details for auth patterns
+
 ## [0.4.0] - 2025-02-13
 
 ### Added

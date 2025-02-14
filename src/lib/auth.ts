@@ -3,32 +3,12 @@ import { clerkClient, EmailAddress, getAuth } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function getDbUser(req: NextRequest) {
-  const { userId: clerkId } = getAuth(req);
-  if (!clerkId) {
-    throw new Error("Unauthorized");
+export async function requireDbUser(req: NextRequest) {
+  const { userId } = getAuth(req);
+  if (!userId) {
+    throw new Error("Not authenticated");
   }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user;
-}
-
-export async function requireAuth(req: NextRequest) {
-  try {
-    return await getDbUser(req);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Authentication failed");
-  }
+  return findOrCreateUser(userId);
 }
 
 export async function isAdmin(clerkId: string) {
@@ -54,7 +34,7 @@ export async function requireAdmin(req: NextRequest) {
   return null; // Auth check passed
 }
 
-export async function findOrCreateUser(clerkId: string) {
+async function findOrCreateUser(clerkId: string) {
   // First try to find the user
   const existingUser = await prisma.user.findUnique({
     where: { clerkId },
@@ -90,13 +70,4 @@ export async function findOrCreateUser(clerkId: string) {
   });
 
   return newUser;
-}
-
-export async function syncUser(req: NextRequest) {
-  const { userId: clerkId } = getAuth(req);
-  if (!clerkId) {
-    throw new Error("Unauthorized");
-  }
-
-  return findOrCreateUser(clerkId);
 }

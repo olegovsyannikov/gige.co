@@ -1,25 +1,18 @@
+import { requireAdmin, requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ApiResponse } from "@/types/common";
-import { auth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    // First ensure user is authenticated
+    await requireDbUser(req);
 
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Unauthorized",
-            status: 401,
-          },
-        },
-        { status: 401 }
-      );
+    // Then check admin access
+    const adminCheck = await requireAdmin(req);
+    if (adminCheck) {
+      return adminCheck;
     }
-
-    // TODO: Add admin role check
 
     const jobs = await prisma.job.findMany({
       orderBy: {
@@ -58,10 +51,18 @@ export async function GET() {
         error: {
           message:
             error instanceof Error ? error.message : "Internal server error",
-          status: 500,
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
         },
       },
-      { status: 500 }
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
     );
   }
 }

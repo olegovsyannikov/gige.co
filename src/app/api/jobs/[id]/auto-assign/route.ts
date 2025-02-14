@@ -1,10 +1,9 @@
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { findBestMatch } from "@/services/matching";
 import { Agent } from "@/types/agent";
-import { JsonSchema } from "@/types/common";
+import { ApiResponse, JsonSchema } from "@/types/common";
 import { Job } from "@/types/job";
-import { getAuth } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,17 +12,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const user = await requireDbUser(req);
     const { id: jobId } = await params;
 
     // Get job and available agents
     const [job, agents] = await Promise.all([
       prisma.job.findUnique({
-        where: { id: jobId },
+        where: {
+          id: jobId,
+          createdByUserId: user.id, // Ensure user owns the job
+        },
         include: { agent: true },
       }),
       prisma.agent.findMany({
@@ -32,7 +30,15 @@ export async function POST(
     ]);
 
     if (!job) {
-      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: {
+            message: "Job not found",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      );
     }
 
     // If job is not pending, require admin access
@@ -94,7 +100,16 @@ export async function POST(
         },
       });
 
-      return NextResponse.json(result);
+      return NextResponse.json(
+        {
+          error: {
+            message: "No suitable agent found",
+            reasoning: result.reasoning,
+            status: 404,
+          },
+        },
+        { status: 404 }
+      );
     }
 
     // Update job with matched agent and create log in a transaction
@@ -139,11 +154,30 @@ export async function POST(
       }),
     ]);
 
-    return NextResponse.json({ data: updatedJob });
+    const response: ApiResponse<typeof updatedJob> = {
+      data: updatedJob,
+    };
+
+    return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error in auto job assignment:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
+        },
+      },
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
+    );
   }
 }

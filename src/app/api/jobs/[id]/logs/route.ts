@@ -1,6 +1,6 @@
+import { requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ApiResponse } from "@/types/common";
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -8,37 +8,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const user = await requireDbUser(req);
     const { id } = await params;
-
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Unauthorized",
-            status: 401,
-          },
-        },
-        { status: 401 }
-      );
-    }
-
-    // Find the user in our database
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "User not found",
-            status: 404,
-          },
-        },
-        { status: 404 }
-      );
-    }
 
     // First check if the user has access to this job
     const job = await prisma.job.findUnique({
@@ -89,10 +60,18 @@ export async function GET(
         error: {
           message:
             error instanceof Error ? error.message : "Internal server error",
-          status: 500,
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
         },
       },
-      { status: 500 }
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
     );
   }
 }

@@ -1,4 +1,4 @@
-import { getDbUser } from "@/lib/auth";
+import { requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ApiResponse } from "@/types/common";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,7 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getDbUser(req);
+    const user = await requireDbUser(req);
     const { id } = await params;
 
     const job = await prisma.job.findUnique({
@@ -69,10 +69,18 @@ export async function GET(
         error: {
           message:
             error instanceof Error ? error.message : "Internal server error",
-          status: 500,
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
         },
       },
-      { status: 500 }
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
     );
   }
 }
@@ -82,7 +90,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getDbUser(req);
+    const user = await requireDbUser(req);
     const jobId = (await params).id;
     const body = await req.json();
 
@@ -91,18 +99,21 @@ export async function PUT(
 
       // Get job to check ownership and status
       const job = await prisma.job.findUnique({
-        where: { id: jobId },
+        where: {
+          id: jobId,
+          createdByUserId: user.id, // Ensure user owns the job
+        },
       });
 
       if (!job) {
-        return NextResponse.json({ error: "Job not found" }, { status: 404 });
-      }
-
-      // Only allow the job creator to update it
-      if (job.createdByUserId !== user.id) {
         return NextResponse.json(
-          { error: "Not authorized to update this job" },
-          { status: 403 }
+          {
+            error: {
+              message: "Job not found",
+              status: 404,
+            },
+          },
+          { status: 404 }
         );
       }
 
@@ -110,8 +121,11 @@ export async function PUT(
       if (job.status !== "PENDING" && job.status !== "RESUBMISSION_REQUIRED") {
         return NextResponse.json(
           {
-            error:
-              "Only pending jobs or jobs that need resubmission can be edited",
+            error: {
+              message:
+                "Only pending jobs or jobs that need resubmission can be edited",
+              status: 400,
+            },
           },
           { status: 400 }
         );
@@ -160,7 +174,12 @@ export async function PUT(
     } catch (error) {
       if (error instanceof z.ZodError) {
         return NextResponse.json(
-          { error: error.errors[0].message },
+          {
+            error: {
+              message: error.errors[0].message,
+              status: 422,
+            },
+          },
           { status: 422 }
         );
       }
@@ -168,8 +187,23 @@ export async function PUT(
     }
   } catch (error: unknown) {
     console.error("Error updating job:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
+        },
+      },
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
+    );
   }
 }

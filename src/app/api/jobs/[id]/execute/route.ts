@@ -1,7 +1,7 @@
+import { requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { validateAgentResponse } from "@/services/validation";
 import { ApiResponse } from "@/types/common";
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
@@ -9,25 +9,15 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Unauthorized",
-            status: 401,
-          },
-        },
-        { status: 401 }
-      );
-    }
-
+    const user = await requireDbUser(req);
     const { id: jobId } = await params;
 
     // Get job with agent details and latest assigned log
     const job = await prisma.job.findUnique({
-      where: { id: jobId },
+      where: {
+        id: jobId,
+        createdByUserId: user.id, // Ensure user owns the job
+      },
       include: {
         agent: true,
         logs: {
@@ -274,10 +264,18 @@ export async function POST(
         error: {
           message:
             error instanceof Error ? error.message : "Internal server error",
-          status: 500,
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
         },
       },
-      { status: 500 }
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
     );
   }
 }

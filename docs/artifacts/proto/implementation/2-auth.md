@@ -2,7 +2,7 @@
 
 ## Overview
 
-Authentication is implemented using Clerk, providing secure user management and session handling. The system implements a double-layered protection mechanism with middleware and API-level authorization checks, including role-based access control for admin features. User data is automatically synchronized between Clerk and our database through middleware-level integration.
+Authentication is implemented using Clerk, providing secure user management and session handling. The system implements a double-layered protection mechanism with middleware and API-level authorization checks, including role-based access control for admin features. User data is automatically synchronized between Clerk and our database through middleware-level integration. All API routes use a centralized `requireDbUser` function for consistent authentication and error handling.
 
 ## Technical Implementation
 
@@ -24,67 +24,68 @@ Authentication is implemented using Clerk, providing secure user management and 
 
 1. **Middleware**
 
-   ```typescript
-   export default authMiddleware({
-     publicRoutes: ["/", "/api/public(.*)"],
-     adminRoutes: ["/admin(.*)"],
-     afterAuth: async (auth, req) => {
-       // User synchronization and role verification
-       if (auth.userId) {
-         await syncUser(auth.userId);
-       }
-     },
-   });
-   ```
+   - Configures public and admin routes
+   - Handles user synchronization after authentication
+   - Verifies roles for protected routes
+   - Manages authentication state
+   - Provides route-based protection
 
-2. **User Synchronization**
+2. **API Authentication**
 
-   ```typescript
-   // Middleware-level sync
-   if (userId && isApiRoute(req)) {
-     const syncResponse = await fetch("/api/auth/sync", {
-       headers: { cookie: req.headers.get("cookie") || "" },
-     });
-     // Error handling and response processing
-   }
-
-   // Sync endpoint
-   export async function GET() {
-     const { userId } = await auth();
-     const dbUser = await findOrCreateUser(userId);
-     return NextResponse.json({ success: true, user: dbUser });
-   }
-   ```
+   - Centralized `requireDbUser` function that:
+     - Verifies Clerk authentication
+     - Ensures user exists in database
+     - Provides type-safe user context
+     - Handles authentication errors consistently
+   - Standardized error response format
+   - HTTP status code mapping (401/500)
+   - Automatic user context validation
 
 3. **API Protection**
-   ```typescript
-   export async function validateAdmin(userId: string) {
-     const user = await clerkClient.users.getUser(userId);
-     return user?.publicMetadata?.role === "admin";
-   }
-   ```
+   - Admin role validation
+   - Role-based access control
+   - Metadata-based permission checks
+   - Secure role verification
+
+### Authentication Patterns
+
+1. **User Context**
+
+   - Automatic user synchronization
+   - Database user validation
+   - Type-safe user objects
+   - Error handling for missing users
+
+2. **Error Handling**
+
+   - Standardized error response format
+   - Consistent HTTP status codes
+   - Clear error messages
+   - Authentication-specific error detection
+
+3. **Role Management**
+   - Role-based route protection
+   - Admin access control
+   - Role verification in middleware
+   - Role-based UI adaptation
 
 ### Services
 
-```typescript
-// Auth Utilities
-export const authUtils = {
-  validateAdmin: (userId: string) => Promise<boolean>,
-  getUserRole: (userId: string) => Promise<UserRole>,
-  updateUserRole: (userId: string, role: UserRole) => Promise<void>,
-  syncUser: (userId: string) => Promise<User>,
-};
+The authentication system provides several utility services:
 
-// Role Types
-export type UserRole = "user" | "admin" | "agent";
+1. **Auth Utilities**
 
-// Session Management
-export const sessionUtils = {
-  getSession: () => Promise<Session>,
-  validateSession: (token: string) => Promise<boolean>,
-  revokeSession: (sessionId: string) => Promise<void>,
-};
-```
+   - User requirement validation
+   - Admin validation
+   - Role management
+   - User synchronization
+   - Type-safe interfaces
+
+2. **Session Management**
+   - Session retrieval
+   - Token validation
+   - Session revocation
+   - Secure session handling
 
 ## Current Status
 
@@ -94,6 +95,8 @@ export const sessionUtils = {
 - ✅ Admin routes
 - ✅ Session management
 - ✅ Automatic user synchronization
+- ✅ Centralized auth function
+- ✅ Consistent error handling
 - ⏳ Role management UI
 - ❌ OAuth providers
 
@@ -111,7 +114,8 @@ export const sessionUtils = {
    - Middleware-first approach
    - Double-layered verification
    - Role-based routing
-   - API-level checks
+   - Centralized API auth function
+   - Consistent error handling
 
 3. **User Synchronization**
 
@@ -120,10 +124,11 @@ export const sessionUtils = {
    - Error handling
    - Performance optimization
 
-4. **Session Handling**
-   - Secure token storage
-   - Automatic token rotation
-   - Cross-tab synchronization
+4. **API Authentication**
+   - Centralized `requireDbUser` function
+   - Type-safe user context
+   - Standardized error responses
+   - Ownership validation in queries
 
 ## Known Issues
 
@@ -156,4 +161,4 @@ export const sessionUtils = {
 ---
 
 Last Updated: 2025-02-13
-Version: 0.3.5
+Version: 0.4.1

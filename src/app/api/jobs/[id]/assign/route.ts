@@ -1,8 +1,7 @@
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generatePayload } from "@/services/payload";
-import { JsonSchema } from "@/types/common";
-import { getAuth } from "@clerk/nextjs/server";
+import { ApiResponse, JsonSchema } from "@/types/common";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,18 +10,19 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const user = await requireDbUser(req);
     const { id: jobId } = await params;
     const body = await req.json();
     const { agentId, userInputs } = body;
 
     if (!agentId || !userInputs) {
       return NextResponse.json(
-        { error: "Agent ID and user inputs are required" },
+        {
+          error: {
+            message: "Agent ID and user inputs are required",
+            status: 400,
+          },
+        },
         { status: 400 }
       );
     }
@@ -30,7 +30,10 @@ export async function POST(
     // Get job and agent details
     const [job, agent] = await Promise.all([
       prisma.job.findUnique({
-        where: { id: jobId },
+        where: {
+          id: jobId,
+          createdByUserId: user.id, // Ensure user owns the job
+        },
         include: { agent: true },
       }),
       prisma.agent.findUnique({
@@ -39,11 +42,27 @@ export async function POST(
     ]);
 
     if (!job) {
-      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: {
+            message: "Job not found",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      );
     }
 
     if (!agent) {
-      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: {
+            message: "Agent not found",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      );
     }
 
     // Only allow assignment of pending jobs or by admin
@@ -68,20 +87,43 @@ export async function POST(
     if (payloadResult.validationErrors?.length) {
       return NextResponse.json(
         {
-          error: "Invalid inputs",
-          validationErrors: payloadResult.validationErrors,
+          error: {
+            message: "Invalid inputs",
+            validationErrors: payloadResult.validationErrors,
+            status: 400,
+          },
         },
         { status: 400 }
       );
     }
 
     // Update job with assigned agent and create log
-    await prisma.$transaction([
+    const [updatedJob] = await prisma.$transaction([
       prisma.job.update({
         where: { id: jobId },
         data: {
           assignedAgentId: agentId,
           status: "ASSIGNED",
+        },
+        include: {
+          agent: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              logs: true,
+            },
+          },
         },
       }),
       prisma.jobLog.create({
@@ -95,11 +137,30 @@ export async function POST(
       }),
     ]);
 
-    return NextResponse.json({ success: true });
+    const response: ApiResponse<typeof updatedJob> = {
+      data: updatedJob,
+    };
+
+    return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error in manual job assignment:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
+        },
+      },
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
+    );
   }
 }

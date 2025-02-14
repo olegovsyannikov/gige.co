@@ -1,5 +1,5 @@
+import { requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
@@ -7,16 +7,15 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const user = await requireDbUser(req);
     const jobId = (await params).id;
 
     // Get job details
     const job = await prisma.job.findUnique({
-      where: { id: jobId },
+      where: {
+        id: jobId,
+        createdByUserId: user.id, // Ensure user owns the job
+      },
       include: { agent: true },
     });
 
@@ -74,8 +73,23 @@ export async function POST(
     return NextResponse.json({ data: updatedJob });
   } catch (error: unknown) {
     console.error("Error cancelling job assignment:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status:
+            error instanceof Error && error.message.includes("authenticated")
+              ? 401
+              : 500,
+        },
+      },
+      {
+        status:
+          error instanceof Error && error.message.includes("authenticated")
+            ? 401
+            : 500,
+      }
+    );
   }
 }
