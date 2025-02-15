@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { recordJobLogOnChain } from "@/lib/safe/job-logs";
 import { ApiResponse } from "@/types/common";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -97,6 +98,7 @@ export async function POST(
           select: {
             id: true,
             name: true,
+            safeAddress: true,
           },
         },
         user: {
@@ -106,6 +108,12 @@ export async function POST(
             email: true,
           },
         },
+        logs: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
         _count: {
           select: {
             logs: true,
@@ -113,6 +121,11 @@ export async function POST(
         },
       },
     });
+
+    // Record reassignment on-chain
+    if (updatedJob.logs[0]) {
+      await recordJobLogOnChain(updatedJob, "ASSIGNED", updatedJob.logs[0].id);
+    }
 
     const response: ApiResponse<typeof updatedJob> = {
       data: updatedJob,
