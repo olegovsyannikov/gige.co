@@ -49,5 +49,10 @@
     "deploymentEnabled": {
       "main": true
     }
+  },
+  "functions": {
+    "app/api/**/*": {
+      "maxDuration": 60
+    }
   }
 }
