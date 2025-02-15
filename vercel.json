@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./marketing-site/",
   "buildCommand": "npx prisma generate && pnpm build",
   "outputDirectory": ".next",
   "cleanUrls": true,
-  "excludeFiles": ["marketing-site/**/*"],
   "headers": [
     {
       "source": "/api/(.*)",
