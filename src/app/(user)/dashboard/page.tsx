@@ -14,6 +14,22 @@ import { getDashboardData, type DashboardData } from "@/services/dashboard";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 
+// Adapter function to transform dashboard agents into AgentsList format
+const adaptDashboardAgents = (dashboardAgents: DashboardData["agents"]) => {
+  return dashboardAgents.map((agent) => ({
+    id: agent.id,
+    name: agent.name,
+    description: agent.description,
+    keywords: agent.tags.join(", "),
+    isActive: true, // Default to true since dashboard shows active agents
+    inputSchema: null,
+    safeAddress: null,
+    _count: {
+      jobs: agent.jobsCompleted
+    }
+  }));
+};
+
 const emptyStats: DashboardData = {
   userStats: {
     total: 0,
@@ -88,6 +104,7 @@ export default function DashboardPage() {
   }
 
   const { userStats, globalStats, agentStats, agents } = dashboardData;
+  const adaptedAgents = adaptDashboardAgents(agents);
 
   return (
     <div className="container mx-auto p-6">
@@ -238,7 +255,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <AgentsList agents={agents} showAllLink />
+                <AgentsList agents={adaptedAgents} showAllLink />
               )}
             </CardContent>
           </Card>

@@ -7,36 +7,32 @@ export async function GET() {
     const provider = safeService.getProvider();
 
     // Check network connection
-    const network = await provider.getNetwork();
+    const chainId = await provider.getChainId();
 
     // Get latest block
     const blockNumber = await provider.getBlockNumber();
 
     // Get gas price
-    const gasPrice = await provider.getGasPrice();
+    const feeData = await provider.estimateFeesPerGas();
 
-    // Check signer
-    const signer = await provider
-      .getSigner()
-      .getAddress()
-      .catch(() => null);
+    // Get signer
+    const signer = safeService.getSigner();
 
     return NextResponse.json({
       status: "healthy",
       network: {
-        name: network.name,
-        chainId: network.chainId,
+        chainId,
         configuredChainId: SAFE_CONFIG.network.chainId,
-        isCorrectNetwork: network.chainId === SAFE_CONFIG.network.chainId,
+        isCorrectNetwork: chainId === SAFE_CONFIG.network.chainId,
       },
       provider: {
         rpcUrl: SAFE_CONFIG.rpcUrl.replace(/\/.*@/, "/***@"), // Hide API key if present
         blockNumber,
-        gasPrice: gasPrice.toString(),
+        gasPrice: feeData?.maxFeePerGas?.toString() ?? "unknown",
       },
-      signer: signer
+      signer: signer.account
         ? {
-            address: signer,
+            address: signer.account.address,
           }
         : null,
       timestamp: new Date().toISOString(),

@@ -27,6 +27,11 @@ export class SafeService {
     return this.provider;
   }
 
+  // Add getter for signer
+  getSigner(): WalletClient {
+    return this.signer;
+  }
+
   /**
    * Validate network connection and configuration
    */

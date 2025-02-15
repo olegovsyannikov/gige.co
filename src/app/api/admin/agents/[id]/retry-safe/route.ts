@@ -48,7 +48,9 @@ export async function POST(
     if (agent.safeAddress) {
       // If Safe exists, verify its code on chain
       const provider = safeService.getProvider();
-      const code = await provider.getCode(agent.safeAddress);
+      const code = await provider.getBytecode({
+        address: agent.safeAddress as `0x${string}`,
+      });
 
       if (code !== "0x") {
         return NextResponse.json(

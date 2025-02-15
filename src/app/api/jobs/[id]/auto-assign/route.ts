@@ -60,6 +60,7 @@ export async function POST(
       result: job.result as JsonSchema | null,
       createdByUserId: job.createdByUserId,
       assignedAgentId: job.assignedAgentId,
+      onChainAssignmentTxHash: null,
       createdAt: job.createdAt.toISOString(),
       updatedAt: job.updatedAt.toISOString(),
       agent: job.agent
