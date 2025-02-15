@@ -5,7 +5,7 @@ import { sepolia } from "viem/chains";
 // Safe configuration
 export const SAFE_CONFIG = {
   chainId: process.env.NEXT_PUBLIC_CHAIN_ID || "11155111", // Sepolia testnet
-  rpcUrl: process.env.GOERLI_RPC_URL || "",
+  rpcUrl: process.env.SEPOLIA_RPC_URL || "",
   registryAddress: process.env.REGISTRY_CONTRACT_ADDRESS || "",
   network: {
     name: "sepolia",
