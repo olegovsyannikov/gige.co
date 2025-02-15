@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     sepolia: {
-      url: "https://eth-sepolia.g.alchemy.com/v2/nphihsdyWCT6u8JnqRwlTC6guNIRmLf-",
+      url: process.env.SEPOLIA_RPC_URL,
       accounts: process.env.ADMIN_PRIVATE_KEY
         ? [process.env.ADMIN_PRIVATE_KEY]
         : [],
@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      sepolia: "9JIP61H4HM3EP5MUWCFUVPGIGF987ZEVAQ",
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
     },
   },
 };
