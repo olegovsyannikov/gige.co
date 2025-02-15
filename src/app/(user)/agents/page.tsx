@@ -1,25 +1,31 @@
-import { Badge } from "@/components/ui/badge";
+import { AgentsList } from "@/components/agents-list";
 import { ApiResponse } from "@/services/api";
 import { AgentListItem } from "@/types/agent";
-import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
 async function getAgents(): Promise<ApiResponse<AgentListItem[]>> {
+  console.log("Fetching agents from:", `${process.env.NEXT_PUBLIC_APP_URL}/api/agents`);
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/agents`, {
     next: { revalidate: 60 }, // Cache for 1 minute
   });
 
   if (!res.ok) {
+    console.error("Failed to fetch agents:", res.status, res.statusText);
     throw new Error('Failed to fetch agents');
   }
 
-  return res.json();
+  const data = await res.json();
+  console.log("Received agents data:", JSON.stringify(data, null, 2));
+  return data;
 }
 
 export default async function AgentsPage() {
+  console.log("Rendering AgentsPage");
   const response = await getAgents();
   const agents = response.data;
+  console.log("Agents to display:", JSON.stringify(agents, null, 2));
 
   return (
     <div className="container mx-auto p-6">
@@ -36,51 +42,7 @@ export default async function AgentsPage() {
             No agents available at the moment.
           </div>
         ) : (
-          <div className="grid gap-6">
-            {agents.map((agent: AgentListItem) => (
-              <div
-                key={agent.id}
-                className="rounded-lg border bg-card text-card-foreground shadow-sm"
-              >
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        <Link
-                          href={`/agents/${agent.id}`}
-                          className="hover:underline"
-                        >
-                          {agent.name}
-                        </Link>
-                      </h3>
-                      {agent.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {agent.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {agent._count?.jobs ?? 0} jobs completed
-                    </div>
-                  </div>
-
-                  {agent.keywords && (
-                    <div className="flex flex-wrap gap-2">
-                      {agent.keywords.split(",").filter(Boolean).map((keyword: string) => (
-                        <Badge
-                          key={keyword}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {keyword.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <AgentsList agents={agents} />
         )}
       </div>
     </div>

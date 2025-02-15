@@ -1,5 +1,72 @@
 # Development Changelog
 
+## [0.4.4] - 2025-02-15
+
+### Added
+
+- Job Onchain Logs Implementation
+  - Added blockchain integration for job status tracking
+  - Implemented transaction recording for job assignments
+  - Added status update logging on chain
+  - Enhanced UI with transaction links and verification
+  - Integrated with Safe wallet system
+  - Added error handling and retry mechanisms
+
+### Changed
+
+- Safe Agent Deployment
+  - Migrated to Viem from ethers.js for blockchain interaction
+  - Added network validation and configuration
+  - Enhanced error handling for Safe deployment
+  - Added retry functionality for failed deployments
+  - Improved UI feedback for deployment status
+  - Added health check endpoint for blockchain status
+
+### Technical
+
+- Contract Integration:
+  - Two-phase recording for job assignments and status
+  - Transaction confirmation and verification
+  - Database synchronization with blockchain state
+  - Enhanced error handling and recovery
+- UI Enhancements:
+  - Added transaction links to Etherscan
+  - Improved status indicators and badges
+  - Added loading states for blockchain operations
+  - Enhanced error feedback and retry options
+- Documentation:
+  - Added implementation details for job onchain logs
+  - Updated technical documentation for Safe deployment
+  - Added API endpoint documentation
+
+## [0.4.3] - 2025-02-14
+
+### Added
+
+- Smart Contract Implementation
+  - Deployed upgradeable Registry contract
+  - Implemented agent registration functionality
+  - Added job assignment and status logging
+  - Created comprehensive test suite
+  - Added error handling and validation
+  - Integrated with Safe wallet system
+
+### Technical
+
+- Contract Implementation:
+  - UUPS upgradeable pattern with OpenZeppelin
+  - Event-driven architecture for state changes
+  - Gas-optimized storage layout
+  - Comprehensive access control
+- Testing Infrastructure:
+  - Modular test scripts for each function
+  - Error case validation
+  - Gas usage reporting
+  - Event verification
+- Documentation updates:
+  - Added smart contract implementation docs
+  - Updated technical details for blockchain integration
+
 ## [0.4.2] - 2025-02-14
 
 ### Changed

@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgent } from "@/hooks/agents";
@@ -93,6 +93,12 @@ function AgentPageContent({ id }: { id: string }) {
           <CardDescription>{agent.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium">Safe Address</h3>
+            <pre className="rounded-lg bg-muted p-4">
+              <code>{agent.safeAddress}</code>
+            </pre>
+          </div>
           <div className="space-y-2">
             <h3 className="text-sm font-medium">Input Schema</h3>
             <pre className="rounded-lg bg-muted p-4">

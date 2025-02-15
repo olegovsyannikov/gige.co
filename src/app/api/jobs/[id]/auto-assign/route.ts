@@ -1,5 +1,6 @@
 import { requireAdmin, requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { recordJobOnChain } from "@/lib/safe/job-logs";
 import { findBestMatch } from "@/services/matching";
 import { Agent } from "@/types/agent";
 import { ApiResponse, JsonSchema } from "@/types/common";
@@ -59,6 +60,7 @@ export async function POST(
       result: job.result as JsonSchema | null,
       createdByUserId: job.createdByUserId,
       assignedAgentId: job.assignedAgentId,
+      onChainAssignmentTxHash: null,
       createdAt: job.createdAt.toISOString(),
       updatedAt: job.updatedAt.toISOString(),
       agent: job.agent
@@ -113,7 +115,7 @@ export async function POST(
     }
 
     // Update job with matched agent and create log in a transaction
-    const [updatedJob] = await prisma.$transaction([
+    const [updatedJob, newLog] = await prisma.$transaction([
       prisma.job.update({
         where: { id: jobId },
         data: {
@@ -125,6 +127,7 @@ export async function POST(
             select: {
               id: true,
               name: true,
+              safeAddress: true,
             },
           },
           user: {
@@ -133,6 +136,12 @@ export async function POST(
               name: true,
               email: true,
             },
+          },
+          logs: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
           },
           _count: {
             select: {
@@ -153,6 +162,11 @@ export async function POST(
         },
       }),
     ]);
+
+    // Record assignment and log on-chain
+    if (newLog) {
+      await recordJobOnChain(updatedJob, "ASSIGNED", newLog.id);
+    }
 
     const response: ApiResponse<typeof updatedJob> = {
       data: updatedJob,

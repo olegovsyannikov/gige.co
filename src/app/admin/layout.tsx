@@ -25,7 +25,9 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar items={adminNavItems} title="Admin Panel" />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <div className="container mx-auto p-6">{children}</div>
+      </main>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { recordJobLogOnChain } from "@/lib/safe/job-logs";
 import { validateAgentResponse } from "@/services/validation";
 import { ApiResponse } from "@/types/common";
 import { NextRequest, NextResponse } from "next/server";
@@ -146,6 +147,7 @@ export async function POST(
               select: {
                 id: true,
                 name: true,
+                safeAddress: true,
               },
             },
             user: {
@@ -155,6 +157,12 @@ export async function POST(
                 email: true,
               },
             },
+            logs: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+            },
             _count: {
               select: {
                 logs: true,
@@ -162,6 +170,15 @@ export async function POST(
             },
           },
         });
+
+        // Record completion on-chain
+        if (updatedJob.logs[0]) {
+          await recordJobLogOnChain(
+            updatedJob,
+            "COMPLETED",
+            updatedJob.logs[0].id
+          );
+        }
 
         const response: ApiResponse<typeof updatedJob> = {
           data: updatedJob,
@@ -189,6 +206,7 @@ export async function POST(
               select: {
                 id: true,
                 name: true,
+                safeAddress: true,
               },
             },
             user: {
@@ -198,6 +216,12 @@ export async function POST(
                 email: true,
               },
             },
+            logs: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+            },
             _count: {
               select: {
                 logs: true,
@@ -205,6 +229,15 @@ export async function POST(
             },
           },
         });
+
+        // Record resubmission requirement on-chain
+        if (updatedJob.logs[0]) {
+          await recordJobLogOnChain(
+            updatedJob,
+            "RESUBMISSION_REQUIRED",
+            updatedJob.logs[0].id
+          );
+        }
 
         const response: ApiResponse<typeof updatedJob> = {
           data: updatedJob,
@@ -234,6 +267,7 @@ export async function POST(
             select: {
               id: true,
               name: true,
+              safeAddress: true,
             },
           },
           user: {
@@ -243,6 +277,12 @@ export async function POST(
               email: true,
             },
           },
+          logs: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
           _count: {
             select: {
               logs: true,
@@ -250,6 +290,11 @@ export async function POST(
           },
         },
       });
+
+      // Record failure on-chain
+      if (updatedJob.logs[0]) {
+        await recordJobLogOnChain(updatedJob, "FAILED", updatedJob.logs[0].id);
+      }
 
       const response: ApiResponse<typeof updatedJob> = {
         data: updatedJob,

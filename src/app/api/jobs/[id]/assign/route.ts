@@ -1,5 +1,6 @@
 import { requireAdmin, requireDbUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { recordJobOnChain } from "@/lib/safe/job-logs";
 import { generatePayload } from "@/services/payload";
 import { ApiResponse, JsonSchema } from "@/types/common";
 import { Prisma } from "@prisma/client";
@@ -137,50 +138,64 @@ export async function POST(
       requestPayload = userInputs as Prisma.JsonObject;
     }
 
-    // Update job with assigned agent and create log
-    const [updatedJob] = await prisma.$transaction([
-      prisma.job.update({
-        where: { id: jobId },
-        data: {
-          assignedAgentId: agentId,
-          status: "ASSIGNED",
-        },
-        include: {
-          agent: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          _count: {
-            select: {
-              logs: true,
-            },
-          },
-        },
-      }),
-      prisma.jobLog.create({
-        data: {
-          jobId,
-          agentId,
-          status: "ASSIGNED",
-          message: generateInput
-            ? "Agent manually assigned by user with AI-generated input"
-            : "Agent manually assigned by user with custom input",
-          requestPayload,
-        },
-      }),
-    ]);
+    // First update the job
+    await prisma.job.update({
+      where: { id: jobId },
+      data: {
+        assignedAgentId: agentId,
+        status: "ASSIGNED",
+      },
+    });
 
-    const response: ApiResponse<typeof updatedJob> = {
-      data: updatedJob,
+    console.log("Creating new job log...");
+    // Then create the log
+    const createdLog = await prisma.jobLog.create({
+      data: {
+        jobId,
+        agentId,
+        status: "ASSIGNED",
+        message: generateInput
+          ? "Agent manually assigned by user with AI-generated input"
+          : "Agent manually assigned by user with custom input",
+        requestPayload,
+      },
+    });
+    console.log("Created new log:", {
+      logId: createdLog.id,
+      createdAt: createdLog.createdAt,
+    });
+
+    // Fetch the final job state with all logs
+    const finalJob = await prisma.job.findUnique({
+      where: { id: jobId },
+      include: {
+        agent: {
+          select: {
+            id: true,
+            name: true,
+            safeAddress: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        logs: true,
+      },
+    });
+
+    if (!finalJob) {
+      throw new Error("Failed to fetch updated job");
+    }
+
+    // Record assignment and log on-chain using the newly created log ID
+    await recordJobOnChain(finalJob, "ASSIGNED", createdLog.id);
+
+    const response: ApiResponse<typeof finalJob> = {
+      data: finalJob,
     };
 
     return NextResponse.json(response);

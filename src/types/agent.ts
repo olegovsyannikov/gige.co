@@ -33,6 +33,7 @@ export interface Agent {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  safeAddress: string | null;
   _count: {
     jobs: number;
     jobLogs: number;
@@ -46,6 +47,7 @@ export interface AgentListItem {
   keywords: string;
   isActive: boolean;
   inputSchema: JsonSchema | null;
+  safeAddress: string | null;
   _count?: {
     jobs: number;
   };

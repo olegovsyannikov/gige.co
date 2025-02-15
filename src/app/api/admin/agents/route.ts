@@ -1,5 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { safeService } from "@/lib/safe/service";
+import { ApiResponse } from "@/services/api";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -24,15 +26,29 @@ export async function GET(req: NextRequest) {
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        _count: {
+          select: {
+            jobs: true,
+          },
+        },
+      },
     });
 
-    return NextResponse.json(agents);
+    const response: ApiResponse<typeof agents> = {
+      data: agents,
+    };
+
+    return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error fetching agents:", error);
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Internal server error",
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status: 500,
+        },
       },
       { status: 500 }
     );
@@ -61,13 +77,17 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         return NextResponse.json(
           {
-            message:
-              error instanceof Error ? error.message : "Invalid JSON schema",
+            error: {
+              message:
+                error instanceof Error ? error.message : "Invalid JSON schema",
+              status: 400,
+            },
           },
           { status: 400 }
         );
       }
 
+      // Create agent in database first
       const agent = await prisma.agent.create({
         data: {
           name: body.name,
@@ -80,11 +100,50 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json(agent);
+      // Deploy Safe wallet for the agent
+      try {
+        const { safeAddress, txHash } = await safeService.deployAgentSafe(
+          agent.id
+        );
+
+        // Update agent with Safe details
+        const updatedAgent = await prisma.agent.update({
+          where: { id: agent.id },
+          data: {
+            safeAddress,
+            safeTxHash: txHash,
+          },
+        });
+
+        const response: ApiResponse<typeof updatedAgent> = {
+          data: updatedAgent,
+        };
+
+        return NextResponse.json(response);
+      } catch (error) {
+        console.error("Failed to deploy Safe wallet:", error);
+        // Return the agent even if Safe deployment fails
+        // The Safe can be deployed later through a separate endpoint
+        const response: ApiResponse<typeof agent & { safeError: string }> = {
+          data: {
+            ...agent,
+            safeError:
+              error instanceof Error
+                ? error.message
+                : "Failed to deploy Safe wallet",
+          },
+        };
+        return NextResponse.json(response);
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         return NextResponse.json(
-          { message: error.errors[0].message },
+          {
+            error: {
+              message: error.errors[0].message,
+              status: 422,
+            },
+          },
           { status: 422 }
         );
       }
@@ -94,8 +153,11 @@ export async function POST(req: NextRequest) {
     console.error("Error creating agent:", error);
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Internal server error",
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status: 500,
+        },
       },
       { status: 500 }
     );
@@ -113,7 +175,12 @@ export async function PUT(req: NextRequest) {
 
     if (!body.id) {
       return NextResponse.json(
-        { message: "Agent ID is required" },
+        {
+          error: {
+            message: "Agent ID is required",
+            status: 400,
+          },
+        },
         { status: 400 }
       );
     }
@@ -131,19 +198,31 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(agent);
+    const response: ApiResponse<typeof agent> = {
+      data: agent,
+    };
+
+    return NextResponse.json(response);
   } catch (error: unknown) {
     console.error("Error updating agent:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: error.errors[0].message },
+        {
+          error: {
+            message: error.errors[0].message,
+            status: 422,
+          },
+        },
         { status: 422 }
       );
     }
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Internal server error",
+        error: {
+          message:
+            error instanceof Error ? error.message : "Internal server error",
+          status: 500,
+        },
       },
       { status: 500 }
     );

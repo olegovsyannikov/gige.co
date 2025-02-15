@@ -18,6 +18,7 @@ export interface Job {
   result: JsonSchema | null;
   createdByUserId: string;
   assignedAgentId: string | null;
+  onChainAssignmentTxHash: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
   agent?: {
@@ -61,5 +62,6 @@ export interface JobLog {
   responsePayload: JsonSchema | null;
   status: string;
   message: string | null;
+  onChainTxHash: string | null;
   createdAt: string | Date;
 }
