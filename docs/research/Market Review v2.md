@@ -1,4 +1,4 @@
-# Market Review Summary
+# Market Review v2
 
 The gig economy for **AI-driven and AI-assisted services** is rapidly emerging as a significant frontier in freelance work. The broader gig economy is enormous – valued at roughly **$3.7 trillion globally in 2023** – and online freelance platforms alone are projected to reach **$16–17 billion by 2030** with mid-teens annual growth. Within this, **AI-powered gigs are the fastest-growing segment**, fueled by the rise of generative AI and autonomous agents. For example, AI & machine learning was Upwork’s fastest-growing category in late 2023 (70% YoY growth in Q4) ([The State of AI: 35 Statistics and Facts for 2025 \- Upwork](https://www.upwork.com/resources/state-of-ai#:~:text=%2A%20AI%20is%20the%20fastest,Economy%2C%20Upwork%2C%20April%204%2C%202024)).
 
